@@ -1,0 +1,87 @@
+FAMAN — TERMINAL GLYPH
+=======================
+
+Closer silhouette of the official mark: two upward-curling horns
++ central tapered chin/drop.
+
+────────────────────────────────────────
+1. PRIMARY (Unicode, recommended)
+────────────────────────────────────────
+
+    ╭──╮ ╭──╮
+   ╱    ╲╱    ╲
+  ╱      ┃      ╲
+         ┃
+         ▾
+
+Compact 3-line (most terminals):
+
+    ╭─╮ ╭─╮
+   ╱   ╲╱   ╲
+       ▾
+
+Ultra-compact 2-line:
+
+   ╭╮  ╭╮
+    ╲▾╱
+
+────────────────────────────────────────
+2. ALTERNATE (more horn-like curve)
+────────────────────────────────────────
+
+    ︵     ︵
+   ╱ ╲   ╱ ╲
+  ╱   ╲╱   ╲
+       │
+       ▾
+
+Or with half-circles:
+
+    ◠     ◠
+   ╱ ╲   ╱ ╲
+  ╱   ╲╱   ╲
+       V
+
+────────────────────────────────────────
+3. ASCII-ONLY (no Unicode needed)
+────────────────────────────────────────
+
+    ,--. ,--.
+   /    X    \
+  /     |     \
+        |
+        V
+
+Compact ASCII:
+
+   /‾\ /‾\
+  /   X   \
+      V
+
+Minimal ASCII:
+
+   /\  /\
+  /  \/  \
+     \/
+
+────────────────────────────────────────
+4. SINGLE CHARACTER (prompts / status)
+────────────────────────────────────────
+
+  Best:   ∧   (U+2227 LOGICAL AND)
+  Alt:    Λ   (U+039B GREEK CAPITAL LAMBDA)
+  Avoid:  ⌂ ᛘ  (low resemblance)
+
+  Example prompt:
+    export PS1='∧ faman $ '
+
+────────────────────────────────────────
+5. USAGE NOTES
+────────────────────────────────────────
+
+- Always use the terminal's default foreground color
+  (no forced ANSI colors) so it adapts to light/dark themes.
+- Prefer the compact 3-line or 2-line forms for README /
+  help banners; use single-char ∧ only when space is tight.
+- Do not add color blocks, box-drawing frames, or extra
+  decoration around the glyph — the silhouette is the identity.
