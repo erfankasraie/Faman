@@ -1,95 +1,66 @@
 ---
 title: docker
 aliases:
-category: containers
+category: development
 difficulty: intermediate
 keywords:
 - container
 - image
-- virtualization
+- devops
 ---
 
 # Introduction
 
-`docker` پلتفرم محبوب کانتینرها است که به شما اجازه می‌دهد برنامه‌ها را به صورت ایزوله و قابل‌حمل اجرا کنید.
+`docker` پلتفرم اجرای کانتینر است؛ اپلیکیشن را با وابستگی‌هایش ایزوله اجرا می‌کند.
 
 # Syntax
 
 ```
-docker <command> [<args>]
+docker [OPTIONS] COMMAND
 ```
 
-# دستورات اصلی
+# Options
 
-## تصاویر (Images)
-
-```bash
-docker images                 # لیست تصاویر
-docker pull IMAGE             # دانلود تصویر
-docker build -t NAME .        # ساخت تصویر از Dockerfile
-docker rmi IMAGE              # حذف تصویر
-```
-
-## کانتینرها
-
-```bash
-docker ps                     # کانتینرهای در حال اجرا
-docker ps -a                  # همه کانتینرها
-docker run IMAGE              # اجرای کانتینر
-docker run -d --name NAME IMAGE  # اجرا در پس‌زمینه
-docker run -it IMAGE sh       # تعاملی
-docker stop ID/NAME           # توقف
-docker start ID/NAME          # شروع
-docker rm ID/NAME             # حذف کانتینر
-docker logs ID/NAME           # مشاهده لاگ
-docker exec -it ID/NAME sh    # ورود به کانتینر در حال اجرا
-```
-
-## شبکه‌ها و حجم‌ها
-
-```bash
-docker network ls
-docker volume ls
-docker run -v HOST:CONTAINER IMAGE
-docker run -p HOST_PORT:CONTAINER_PORT IMAGE
-```
+| فرمان | توضیح |
+|-------|--------|
+| `ps` | کانتینرهای در حال اجرا |
+| `ps -a` | همه کانتینرها |
+| `images` | لیست ایمیج‌ها |
+| `pull IMAGE` | دانلود ایمیج |
+| `run` | اجرای کانتینر |
+| `exec` | دستور داخل کانتینر |
+| `logs` | لاگ |
+| `stop` / `start` / `rm` | مدیریت چرخه عمر |
+| `build` | ساخت ایمیج از Dockerfile |
+| `compose` | چندسرویسی |
 
 # Examples
 
 ```bash
-# اجرای nginx
+docker ps
+docker run --rm -it ubuntu:22.04 bash
 docker run -d -p 8080:80 --name web nginx
-
-# ساخت و اجرای تصویر خودتان
-docker build -t myapp .
-docker run -d -p 3000:3000 myapp
-
-# ورود به کانتینر
+docker logs -f web
 docker exec -it web bash
-
-# پاکسازی
-docker system prune
+docker stop web && docker rm web
+docker build -t myapp:dev .
+docker compose up -d
 ```
 
 # Common mistakes
 
-- اجرای همه چیز با `--privileged` یا `-v /:/host`.
-- فراموش کردن `-d` و پر شدن ترمینال.
-- نگه داشتن کانتینرهای متوقف‌شده و تصاویر بلااستفاده (پر شدن دیسک).
-- استفاده از `latest` tag در production.
+- اجرای همه‌چیز با root داخل کانتینر بدون نیاز.
+- volume را mount نکردن و از دست رفتن داده.
+- پر شدن دیسک از ایمیج/کانتینر بلااستفاده.
 
 # Tips
 
-- همیشه از `.dockerignore` استفاده کنید.
-- برای orchestration از Docker Compose یا Kubernetes استفاده کنید.
-- `docker compose` (با فاصله) نسخه جدید است.
-- منابع را با `--memory` و `--cpus` محدود کنید.
-- برای دیباگ: `docker logs -f` و `docker inspect`.
+- پاکسازی: `docker system prune`
+- وضعیت منابع: `docker stats`
+- ترجیح `docker compose` برای چند سرویس.
 
 # Related commands
 
-- `docker compose` — مدیریت چندکانتینری
-- `podman` — جایگزین بدون daemon
-- `kubectl` — Kubernetes
-- `nerdctl`
-- `buildah`
+- `podman` — جایگزین سازگار
+- `kubectl` — کوبرنتیز
+- `systemctl` — سرویس داکر روی میزبان
