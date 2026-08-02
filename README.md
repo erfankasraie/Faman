@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo/faman-icon-light.png" alt="faman logo" width="120"/>
+  <img src="assets/logo/app-icon-light.png" alt="faman logo" width="120"/>
 </p>
 
 <h1 align="center">faman</h1>
