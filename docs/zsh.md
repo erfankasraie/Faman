@@ -1,111 +1,42 @@
 # پیکربندی zsh برای faman
 
-## نصب خودکار با اسکریپت
+## سریع
 
 ```bash
-# نصب کاربر + RTL + تنظیم zsh
+# نصب + تنظیم شل
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh \
-  | bash -s -- --user --with-rtl --plain-default
+  | bash -s -- --user --with-rtl
+
+# فقط completion و zshrc (اگر faman نصب است)
+PREFIX=$HOME/.local USER_INSTALL=1 bash <(curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install-shell.sh)
 ```
 
-اسکریپت در صورت وجود zsh:
+یا از کلون:
 
-- snippet UTF-8 / PATH را به `~/.zshrc` اضافه می‌کند
-- completion را در `~/.zsh/completions/_faman` می‌نویسد
-- در صورت نیاز `fpath` و `compinit` را یادآوری می‌کند
-
----
-
-## تنظیم دستی کامل
-
-### ۱) PATH (اگر با `--user` نصب کردید)
-
-در `~/.zshrc`:
-
-```zsh
-export PATH="$HOME/.local/bin:$PATH"
+```bash
+PREFIX=$HOME/.local USER_INSTALL=1 bash scripts/install-shell.sh
 ```
 
-### ۲) UTF-8 و نمایش فارسی
+بعد:
 
 ```zsh
-# faman — UTF-8 و نمایش فارسی
-export LANG="${LANG:-en_US.UTF-8}"
-export LC_ALL="${LC_ALL:-en_US.UTF-8}"
-
-# اختیاری: خروجی ساده بدون wrap تهاجمی
-# export FAMAN_PLAIN=1
-# export FAMAN_WRAP=0
-```
-
-برای locale فارسی:
-
-```zsh
-export LANG=fa_IR.UTF-8
-export LC_ALL=fa_IR.UTF-8
-```
-
-### ۳) تکمیل خودکار (completion)
-
-```zsh
-mkdir -p ~/.zsh/completions
-faman completion zsh > ~/.zsh/completions/_faman
-```
-
-در `~/.zshrc` (قبل از `compinit`):
-
-```zsh
-fpath=($HOME/.zsh/completions $fpath)
-autoload -Uz compinit
-compinit
-```
-
-اگر از **Oh My Zsh** استفاده می‌کنید، معمولاً `compinit` از قبل هست؛ فقط `fpath` را **قبل از** `source $ZSH/oh-my-zsh.sh` بگذارید:
-
-```zsh
-fpath=($HOME/.zsh/completions $fpath)
-
-export ZSH="$HOME/.oh-my-zsh"
-# ZSH_THEME=...
-source $ZSH/oh-my-zsh.sh
-```
-
-سپس:
-
-```zsh
-exec zsh   # یا: source ~/.zshrc
+exec zsh
 faman <TAB>
-faman search <TAB>
-```
-
-### ۴) Aliasهای مفید
-
-```zsh
-alias f='faman'
-alias fs='faman search'
-alias fp='FAMAN_PLAIN=1 faman'   # وقتی حروف خراب دیده می‌شود
-```
-
-### ۵) پیام خوش‌آمد اختیاری
-
-```zsh
-# فقط در نشست تعاملی
-if [[ -o interactive ]] && command -v faman >/dev/null; then
-  # quiet — چیزی چاپ نکن مگر بخواهی:
-  # echo "faman $(faman version 2>/dev/null | head -1)"
-fi
 ```
 
 ---
 
-## نمونه بلوک آماده برای `~/.zshrc`
+## بلوک آماده برای `~/.zshrc`
+
+این بلوک را **بالای** `source $ZSH/oh-my-zsh.sh` بگذارید (اگر Oh My Zsh دارید):
 
 ```zsh
 # ── faman ──────────────────────────────────────────
 export PATH="$HOME/.local/bin:$PATH"
 export LANG="${LANG:-en_US.UTF-8}"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
-# export FAMAN_PLAIN=1
+# export FAMAN_PLAIN=1        # اگر حروف خراب بود فعال کنید
+# export FAMAN_WRAP=0
 
 fpath=($HOME/.zsh/completions $fpath)
 
@@ -115,29 +46,61 @@ alias fp='FAMAN_PLAIN=1 faman'
 # ───────────────────────────────────────────────────
 ```
 
-اگر Oh My Zsh دارید، این بلوک را **بالای** `source $ZSH/oh-my-zsh.sh` بگذارید و `compinit` جدا لازم نیست.
-
-بدون Oh My Zsh، بعد از `fpath` این را هم بگذارید:
+بدون Oh My Zsh، بعد از `fpath`:
 
 ```zsh
 autoload -Uz compinit && compinit
 ```
 
+### تولید completion
+
+```zsh
+mkdir -p ~/.zsh/completions
+faman completion zsh > ~/.zsh/completions/_faman
+rm -f ~/.zcompdump*
+compinit
+```
+
+---
+
+## Oh My Zsh
+
+1. `fpath` و بلوک faman **قبل از** `source $ZSH/oh-my-zsh.sh`
+2. نیازی به `compinit` دستی نیست
+3. `exec zsh` بعد از تغییر
+
+## Prezto / Antigen / Zinit
+
+همان منطق: مسیر `~/.zsh/completions` باید در `fpath` باشد **قبل از** initialize شدن سیستم completion.
+
+مثال Zinit:
+
+```zsh
+fpath=($HOME/.zsh/completions $fpath)
+# ... zinit load ...
+```
+
+---
+
+## متغیرهای محیطی مفید
+
+| متغیر | معنی |
+|--------|------|
+| `FAMAN_PLAIN=1` | خروجی ساده، بدون wrap تهاجمی |
+| `FAMAN_WRAP=0` | بدون شکستن خط |
+| `FAMAN_PAGES` | مسیر سفارشی صفحات |
+| `LANG` / `LC_ALL` | باید UTF-8 باشد |
+
 ---
 
 ## عیب‌یابی
 
-| مشکل | راه‌حل |
-|------|--------|
-| `command not found: faman` | PATH و `~/.local/bin` |
-| TAB کار نمی‌کند | `fpath` + `compinit` + فایل `_faman` |
-| حروف فارسی خراب | `LANG/LC_ALL` + فونت ترمینال + `FAMAN_PLAIN=1` |
-| completion کهنه | دوباره `faman completion zsh > ~/.zsh/completions/_faman` |
+| مشکل | کار |
+|------|-----|
+| `faman: command not found` | `export PATH="$HOME/.local/bin:$PATH"` |
+| TAB چیزی نشان نمی‌دهد | `_faman` + `fpath` + `compinit` |
+| completion قدیمی | دوباره `faman completion zsh > ~/.zsh/completions/_faman` و `rm ~/.zcompdump*` |
+| فارسی خراب | فونت ترمینال + UTF-8 + `FAMAN_PLAIN=1` |
 
-تولید مجدد completion:
-
-```zsh
-faman completion zsh | tee ~/.zsh/completions/_faman >/dev/null
-rm -f ~/.zcompdump*
-compinit
-```
+مستندات نصب: [install.md](install.md)  
+ترمینال فارسی: [terminal-persian.md](terminal-persian.md)
