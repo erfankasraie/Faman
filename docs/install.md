@@ -1,79 +1,126 @@
-# نصب آسان faman
+# نصب faman
 
-## یک خط — فقط faman
+## سریع
 
 ```bash
+# فقط faman
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash
-```
 
-## یک خط — faman + فونت فارسی + locale + کمک RTL
-
-```bash
+# faman + فونت + UTF-8 + کمک RTL
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash -s -- --with-rtl
-```
 
-این حالت علاوه بر faman:
-
-- فونت‌های Noto / DejaVu (و Vazirmatn اگر در مخزن باشد) را نصب می‌کند
-- `en_US.UTF-8` و در صورت امکان `fa_IR.UTF-8` را generate می‌کند
-- در صورت امکان **mlterm** را نصب می‌کند (ترمینال قوی‌تر برای RTL)
-- snippet مربوط به UTF-8 را به `~/.bashrc` / `~/.zshrc` اضافه می‌کند
-- راهنمای فونت را در `~/.config/faman/terminal-font-hint.txt` می‌نویسد
-
-## فقط RTL / فونت (اگر faman را قبلاً نصب کرده‌اید)
-
-```bash
+# فقط فونت / RTL
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/setup-rtl.sh | bash
 ```
 
-## از داخل مخزن کلون‌شده
+---
+
+## تنظیمات پیشرفته اسکریپت
 
 ```bash
-git clone https://github.com/erfankasraie/Faman.git
-cd Faman
-bash scripts/install.sh --with-rtl
+bash scripts/install.sh --help
 ```
 
-## بعد از نصب — کارهایی که یک‌بار دستی می‌مانند
+### فلگ‌ها
 
-ترمینال نمی‌تواند فونت پروفایل GUI را همیشه عوض کند. یک‌بار:
+| فلگ | معنی |
+|------|------|
+| `--with-rtl` | faman + فونت + locale + کمک RTL |
+| `--rtl-only` | فقط فونت/locale/RTL |
+| `--skip-deps` | نصب git/go سیستمی را رد کن |
+| `--user` | نصب در `~/.local` بدون sudo برای باینری |
+| `--prefix=DIR` | ریشه نصب (پیش‌فرض `/usr/local`) |
+| `--branch=NAME` | شاخه یا تگ git |
+| `--repo=URL` | آدرس مخزن |
+| `--from-dir=PATH` | ساخت از کلون موجود |
+| `--no-mlterm` | mlterm نصب نشود |
+| `--no-shell-rc` | `.bashrc` / `.zshrc` دست نخورد |
+| `--locale=en\|fa` | locale ترجیحی UTF-8 |
+| `--plain-default` | `FAMAN_PLAIN=1` پیش‌فرض در shell |
+| `--uninstall` | حذف باینری و pages از PREFIX |
+| `--dry-run` | فقط چاپ کارها |
+| `--verbose` | لاگ بیشتر |
 
-### GNOME Terminal (Ubuntu پیش‌فرض)
+### مثال‌ها
 
-1. منوی ☰ → **Preferences**
-2. پروفایل → **Custom font**
-3. `Vazirmatn` یا `Noto Sans Mono` یا `DejaVu Sans Mono`
+```bash
+# نصب کاربر بدون root برای باینری
+bash scripts/install.sh --user --with-rtl
 
-### VS Code / Cursor
+# خروجی ساده فارسی به‌صورت پیش‌فرض
+bash scripts/install.sh --with-rtl --plain-default --locale=fa
 
-در `settings.json`:
+# از کلون فعلی
+cd Faman && bash scripts/install.sh --from-dir=. --skip-deps --with-rtl
+
+# پیش‌نمایش
+bash scripts/install.sh --with-rtl --dry-run --verbose
+
+# حذف
+bash scripts/install.sh --uninstall
+bash scripts/install.sh --user --uninstall
+```
+
+### فایل کانفیگ دائمی
+
+```bash
+mkdir -p ~/.config/faman
+cp ~/.config/faman/install.env.example ~/.config/faman/install.env   # بعد از یک‌بار اجرای --with-rtl
+# یا دستی:
+cat > ~/.config/faman/install.env <<'EOF'
+PREFIX=$HOME/.local
+USER_INSTALL=1
+WITH_RTL=1
+PLAIN_DEFAULT=1
+LOCALE_PREF=fa
+NO_MLTERM=0
+NO_SHELL_RC=0
+BRANCH=main
+EOF
+
+bash scripts/install.sh   # مقادیر از فایل خوانده می‌شوند؛ CLI اولویت دارد
+```
+
+مسیر کانفیگ با `FAMAN_INSTALL_CONFIG` قابل تغییر است.
+
+### متغیرهای محیطی
+
+| متغیر | نقش |
+|--------|------|
+| `FAMAN_REPO_URL` | URL کلون |
+| `FAMAN_BRANCH` | شاخه |
+| `PREFIX` | مسیر نصب |
+| `FAMAN_INSTALL_CONFIG` | مسیر فایل env |
+
+---
+
+## بعد از نصب (یک‌بار دستی)
+
+### GNOME Terminal
+
+Preferences → Custom font → `Vazirmatn` / `DejaVu Sans Mono`
+
+### VS Code
 
 ```json
 "terminal.integrated.fontFamily": "Vazirmatn, DejaVu Sans Mono, monospace"
 ```
 
-### WezTerm
-
-```lua
-return {
-  bidi_enabled = true,
-  font = require("wezterm").font_with_fallback({ "Vazirmatn", "DejaVu Sans Mono" }),
-}
-```
-
-## اگر حروف هنوز خراب است
+### اگر حروف خراب است
 
 ```bash
 export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
 FAMAN_PLAIN=1 faman ls
 ```
 
-جزئیات: [terminal-persian.md](terminal-persian.md)
+بیشتر: [terminal-persian.md](terminal-persian.md)
 
-## حذف
+## حذف دستی
 
 ```bash
 sudo rm -f /usr/local/bin/faman
 sudo rm -rf /usr/local/share/faman
+# یا برای --user:
+rm -f ~/.local/bin/faman
+rm -rf ~/.local/share/faman
 ```
