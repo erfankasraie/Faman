@@ -12,7 +12,7 @@
   <a href="https://github.com/erfankasraie/Faman/actions/workflows/ci.yml"><img src="https://github.com/erfankasraie/Faman/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
   <a href="https://github.com/erfankasraie/Faman/releases"><img src="https://img.shields.io/github/v/release/erfankasraie/Faman?include_prereleases&label=release" alt="Release"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"/></a>
-  <img src="https://img.shields.io/badge/pages-112+-green" alt="pages"/>
+  <img src="https://img.shields.io/badge/pages-124+-green" alt="pages"/>
 </p>
 
 > faman is **not** a translator — it **teaches** Linux commands in Persian.
@@ -23,19 +23,15 @@
 
 ### لینوکس / macOS
 
-کپی کن و بزن — نصب در `~/.local` (معمولاً **بدون sudo**):
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash
 ```
 
-با فونت فارسی + UTF-8 (پیشنهادی روی Ubuntu):
+با فونت فارسی + UTF-8:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash -s -- --rtl
 ```
-
-بعد یک‌بار ترمینال را باز/بسته کن، یا:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -48,19 +44,7 @@ faman ls
 irm https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.ps1 | iex
 ```
 
-سپس `faman.exe` را از `%LOCALAPPDATA%\faman\bin` اجرا کن (یا PATH را طبق پیام اسکریپت تنظیم کن).
-
-### گزینه‌های بیشتر
-
-| کار | دستور |
-|-----|--------|
-| نصب کاربر (پیش‌فرض get.sh) | `.../get.sh \| bash` |
-| + فونت / RTL | `.../get.sh \| bash -s -- --rtl` |
-| نصب سیستم‌واید | `.../get.sh \| bash -s -- --system` |
-| حذف | `curl -fsSL .../install.sh \| bash -s -- --uninstall` |
-| راهنمای کامل | [docs/install.md](docs/install.md) · [docs/windows.md](docs/windows.md) |
-
-نسخه: **0.1.2-pre** · [Releases](https://github.com/erfankasraie/Faman/releases)
+جزئیات: [docs/install.md](docs/install.md) · [docs/windows.md](docs/windows.md) · نسخه **0.1.2-pre** · [Releases](https://github.com/erfankasraie/Faman/releases)
 
 ---
 
@@ -68,48 +52,41 @@ irm https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.ps
 
 ```bash
 faman ls
+faman apt
 faman search docker
-faman grep
 faman version
 ```
 
-حروف خراب؟
+حروف خراب؟ `FAMAN_PLAIN=1 faman ls` — [terminal-persian.md](docs/terminal-persian.md)
 
-```bash
-FAMAN_PLAIN=1 faman ls
-```
+---
 
-راهنمای ترمینال فارسی: [docs/terminal-persian.md](docs/terminal-persian.md)
+## مدیران بسته
+
+| دستور | کاربرد |
+|--------|--------|
+| `apt` `dpkg` | Debian / Ubuntu |
+| `dnf` `rpm` | Fedora / RHEL |
+| `pacman` `yay` | Arch / AUR |
+| `zypper` | openSUSE |
+| `apk` | Alpine |
+| `snap` `flatpak` | بسته‌های اسنپ / فلت‌پک |
+| `brew` `nix` | Homebrew / Nix |
+| `pip` `npm` `cargo` | Python / Node / Rust |
+
+فهرست کامل صفحات: [docs/pages-index.md](docs/pages-index.md)
 
 ---
 
 ## امکانات
 
-- **۱۱۲+** صفحه فارسی برای دستورات لینوکس
-- جستجو، completion، اسکریپت zsh/fzf/bat
+- **۱۲۴+** صفحه فارسی
+- جستجو، completion، zsh/fzf/bat
 - لینوکس · ویندوز · macOS
-- لوگو فقط در CLI (ترجمه‌ها تمیز می‌مانند)
-
----
-
-## مسیر صفحات
-
-`FAMAN_PAGES` → کنار باینری → `/usr/local/share/faman/pages/fa` یا `%LOCALAPPDATA%\faman\pages\fa` → پوشهٔ توسعه
-
----
 
 ## مستندات
 
-[install](docs/install.md) · [windows](docs/windows.md) · [zsh](docs/zsh.md) · [fzf](docs/fzf.md) · [ROADMAP](ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
-
-## ساخت از سورس
-
-```bash
-git clone https://github.com/erfankasraie/Faman.git && cd Faman
-go build -o faman ./cmd/faman
-export FAMAN_PAGES="$PWD/pages/fa"
-./faman ls
-```
+[install](docs/install.md) · [windows](docs/windows.md) · [zsh](docs/zsh.md) · [ROADMAP](ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
 
 ## License
 
