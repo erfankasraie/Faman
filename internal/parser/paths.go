@@ -58,7 +58,7 @@ func pagesDir() (string, error) {
 		}
 	}
 
-	hint := "set FAMAN_PAGES to your pages/fa folder"
+	var hint string
 	if runtime.GOOS == "windows" {
 		hint = "set FAMAN_PAGES or copy pages\\fa to %LOCALAPPDATA%\\faman\\pages\\fa (see docs/windows.md)"
 	} else {
@@ -79,7 +79,6 @@ func userPagesCandidates() []string {
 		}
 	}
 
-	// XDG / cross-platform user config & home
 	if cfg, err := os.UserConfigDir(); err == nil && cfg != "" {
 		out = append(out, filepath.Join(cfg, "faman", "pages", "fa"))
 	}
