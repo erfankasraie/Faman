@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	version = "0.1.0"
+	// version is set at link time: -X github.com/faman-project/faman/internal/app.version=...
+	version = "0.1.2-pre"
 	rootCmd = &cobra.Command{
 		Use:   "faman",
 		Short: "صفحات راهنمای فارسی لینوکس — Persian Manual Pages",
