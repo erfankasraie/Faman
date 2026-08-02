@@ -3,33 +3,36 @@
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash
 #   curl -fsSL ... | bash -s -- --with-rtl
-#   ./scripts/install.sh --with-rtl --prefix /usr/local
+#   curl -fsSL ... | bash -s -- --rtl-only
+#   ./scripts/install.sh --with-rtl --prefix=/usr/local
 set -euo pipefail
 
 REPO_URL="${FAMAN_REPO_URL:-https://github.com/erfankasraie/Faman.git}"
 PREFIX="${PREFIX:-/usr/local}"
 WITH_RTL=0
+RTL_ONLY=0
 SKIP_DEPS=0
-YES=0
 
-for arg in "$@"; do
-  case "$arg" in
-    --with-rtl|--rtl) WITH_RTL=1 ;;
-    --skip-deps) SKIP_DEPS=1 ;;
-    --yes|-y) YES=1 ;;
-    --prefix=*) PREFIX="${arg#*=}" ;;
-    --prefix) shift || true; PREFIX="${1:-/usr/local}" ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --with-rtl|--rtl) WITH_RTL=1; shift ;;
+    --rtl-only) RTL_ONLY=1; WITH_RTL=1; SKIP_DEPS=1; shift ;;
+    --skip-deps) SKIP_DEPS=1; shift ;;
+    --yes|-y) shift ;;
+    --prefix=*) PREFIX="${1#*=}"; shift ;;
+    --prefix) PREFIX="${2:-/usr/local}"; shift 2 ;;
     -h|--help)
       cat <<'EOF'
 faman installer
 
-  --with-rtl    نصب فونت فارسی + locale UTF-8 + ابزارهای کمکی RTL
-  --skip-deps   نصب وابستگی‌های سیستم را رد کن
-  --prefix DIR  مسیر نصب (پیش‌فرض: /usr/local)
-  -y, --yes     بدون تأیید تعاملی
+  --with-rtl     نصب faman + فونت فارسی + locale UTF-8 + کمک RTL
+  --rtl-only     فقط فونت / locale / RTL (بدون نصب faman)
+  --skip-deps    نصب وابستگی‌های سیستم را رد کن
+  --prefix=DIR   مسیر نصب (پیش‌فرض: /usr/local)
 EOF
       exit 0
       ;;
+    *) shift ;;
   esac
 done
 
@@ -65,22 +68,18 @@ install_deps() {
       need_sudo apt-get update -qq
       need_sudo apt-get install -y git make curl ca-certificates
       if ! command -v go >/dev/null 2>&1; then
-        if apt-cache show golang-go >/dev/null 2>&1; then
-          need_sudo apt-get install -y golang-go
-        fi
+        need_sudo apt-get install -y golang-go 2>/dev/null || true
       fi
-      # Go خیلی قدیمی؟ snap
       if command -v go >/dev/null 2>&1; then
-        local major minor
-        major="$(go env GOVERSION 2>/dev/null | sed -E 's/^go([0-9]+).*/\1/' || echo 0)"
-        minor="$(go env GOVERSION 2>/dev/null | sed -E 's/^go[0-9]+\.([0-9]+).*/\1/' || echo 0)"
-        if [[ "${major:-0}" -lt 1 ]] || { [[ "${major:-0}" -eq 1 && "${minor:-0}" -lt 21 ]]; }; then
-          warn "نسخه Go پایین است؛ تلاش برای نصب از snap..."
+        local ver major minor
+        ver="$(go env GOVERSION 2>/dev/null || go version | awk '{print $3}')"
+        major="$(echo "$ver" | sed -E 's/.*go([0-9]+).*/\1/')"
+        minor="$(echo "$ver" | sed -E 's/.*go[0-9]+\.([0-9]+).*/\1/')"
+        if [[ "${major:-0}" -eq 1 && "${minor:-0}" -lt 21 ]]; then
+          warn "نسخه Go پایین است؛ تلاش برای snap..."
           if command -v snap >/dev/null 2>&1; then
             need_sudo snap install go --classic || true
             export PATH="/snap/bin:$PATH"
-          else
-            warn "لطفاً Go 1.22+ را از https://go.dev/dl نصب کنید"
           fi
         fi
       else
@@ -88,35 +87,26 @@ install_deps() {
           need_sudo snap install go --classic
           export PATH="/snap/bin:$PATH"
         else
-          die "go پیدا نشد. نصب کنید: sudo apt install golang-go  یا  https://go.dev/dl"
+          die "go پیدا نشد. sudo apt install golang-go یا https://go.dev/dl"
         fi
       fi
       ;;
-    dnf)
-      need_sudo dnf install -y git golang make curl
-      ;;
-    pacman)
-      need_sudo pacman -Sy --needed --noconfirm git go make curl
-      ;;
-    zypper)
-      need_sudo zypper install -y git go make curl
-      ;;
-    apk)
-      need_sudo apk add --no-cache git go make curl
-      ;;
-    *)
-      warn "توزیع ناشناخته — فرض می‌کنیم git و go از قبل نصب‌اند"
-      ;;
+    dnf) need_sudo dnf install -y git golang make curl ;;
+    pacman) need_sudo pacman -Sy --needed --noconfirm git go make curl ;;
+    zypper) need_sudo zypper install -y git go make curl ;;
+    apk) need_sudo apk add --no-cache git go make curl ;;
+    *) warn "توزیع ناشناخته — فرض بر نصب بودن git/go" ;;
   esac
   command -v git >/dev/null || die "git لازم است"
   command -v go >/dev/null || die "go لازم است"
-  ok "وابستگی‌ها آماده‌اند (go $(go env GOVERSION 2>/dev/null || go version))"
+  ok "وابستگی‌ها آماده (go $(go env GOVERSION 2>/dev/null || go version))"
 }
 
 install_faman() {
   local tmp
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' EXIT
+  # shellcheck disable=SC2064
+  trap "rm -rf '$tmp'" EXIT
 
   log "کلون مخزن..."
   git clone --depth 1 "$REPO_URL" "$tmp/faman"
@@ -144,26 +134,14 @@ install_rtl_stack() {
   case "$pm" in
     apt)
       need_sudo apt-get update -qq
-      # فونت‌ها
-      need_sudo apt-get install -y fonts-noto-core fonts-noto-ui-core fonts-dejavu-core fonts-dejavu-mono 2>/dev/null || true
-      # Vazirmatn اگر در ریپو باشد
+      need_sudo apt-get install -y fonts-noto-core fonts-noto-ui-core fonts-dejavu-core fonts-dejavu-mono fontconfig locales 2>/dev/null || true
       need_sudo apt-get install -y fonts-vazirmatn 2>/dev/null || \
         need_sudo apt-get install -y fonts-vazir 2>/dev/null || \
-        warn "بسته Vazirmatn در apt نبود — از fallback Noto/DejaVu استفاده می‌شود"
-
-      # locale
-      need_sudo apt-get install -y locales 2>/dev/null || true
+        warn "Vazirmatn در apt نبود — Noto/DejaVu کافی است"
       if command -v locale-gen >/dev/null 2>&1; then
         need_sudo locale-gen en_US.UTF-8 fa_IR.UTF-8 2>/dev/null || need_sudo locale-gen en_US.UTF-8
       fi
-
-      # ترمینال با پشتیبانی بهتر RTL (اختیاری)
-      if [[ "$YES" -eq 1 ]] || [[ "$WITH_RTL" -eq 1 ]]; then
-        need_sudo apt-get install -y mlterm 2>/dev/null || warn "mlterm نصب نشد (اختیاری)"
-      fi
-
-      # ابزار کمکی فونت
-      need_sudo apt-get install -y fontconfig 2>/dev/null || true
+      need_sudo apt-get install -y mlterm 2>/dev/null || warn "mlterm نصب نشد (اختیاری)"
       fc-cache -f >/dev/null 2>&1 || true
       ;;
     dnf)
@@ -177,11 +155,10 @@ install_rtl_stack() {
       fc-cache -f >/dev/null 2>&1 || true
       ;;
     *)
-      warn "نصب خودکار فونت برای این توزیع پشتیبانی نشده — docs/terminal-persian.md را ببینید"
+      warn "نصب خودکار فونت برای این توزیع نیست — docs/terminal-persian.md"
       ;;
   esac
 
-  # snippet شل
   local rc snippet
   snippet='# faman — UTF-8 و نمایش فارسی
 export LANG="${LANG:-en_US.UTF-8}"
@@ -190,65 +167,70 @@ export LC_ALL="${LC_ALL:-en_US.UTF-8}"
 '
 
   for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    if [[ -f "$rc" ]] || [[ "$rc" == "$HOME/.bashrc" ]]; then
-      if [[ -f "$rc" ]] && grep -q 'faman — UTF-8' "$rc" 2>/dev/null; then
-        ok "قبلاً در $rc تنظیم شده"
-      else
-        if [[ ! -f "$rc" ]]; then
-          touch "$rc"
-        fi
-        printf '\n%s\n' "$snippet" >> "$rc"
-        ok "تنظیمات به $rc اضافه شد"
-      fi
+    if [[ -f "$rc" ]] && grep -q 'faman — UTF-8' "$rc" 2>/dev/null; then
+      ok "قبلاً در $rc تنظیم شده"
+      continue
+    fi
+    if [[ "$rc" == "$HOME/.bashrc" ]] || [[ -f "$rc" ]]; then
+      [[ -f "$rc" ]] || touch "$rc"
+      printf '\n%s\n' "$snippet" >> "$rc"
+      ok "تنظیمات به $rc اضافه شد"
     fi
   done
 
-  # راهنمای فونت GNOME Terminal
   mkdir -p "$HOME/.config/faman"
   cat > "$HOME/.config/faman/terminal-font-hint.txt" <<'EOF'
 فونت پیشنهادی ترمینال برای فارسی:
   Vazirmatn  یا  Noto Sans Mono  یا  DejaVu Sans Mono
 
-GNOME Terminal:
-  ☰ → Preferences → Profile → Custom font → انتخاب فونت بالا
+GNOME Terminal (Ubuntu):
+  ☰ → Preferences → Profile → Custom font → فونت بالا
 
 VS Code / Cursor (settings.json):
   "terminal.integrated.fontFamily": "Vazirmatn, DejaVu Sans Mono, monospace"
 
 WezTerm (~/.config/wezterm/wezterm.lua):
-  bidi_enabled = true
-  font = wezterm.font_with_fallback({ "Vazirmatn", "DejaVu Sans Mono" })
+  return {
+    bidi_enabled = true,
+    font = require("wezterm").font_with_fallback({ "Vazirmatn", "DejaVu Sans Mono" }),
+  }
 
-mlterm (اگر نصب شد): از منوی اپلیکیشن‌ها باز کنید — برای RTL قوی‌تر است.
+mlterm (اگر نصب شد): از منوی اپلیکیشن‌ها — RTL قوی‌تر.
 EOF
   ok "راهنمای فونت: ~/.config/faman/terminal-font-hint.txt"
 }
 
 main() {
-  log "نصب faman"
-  if [[ "$SKIP_DEPS" -eq 0 ]]; then
-    install_deps
-  fi
-  install_faman
-  if [[ "$WITH_RTL" -eq 1 ]]; then
+  if [[ "$RTL_ONLY" -eq 1 ]]; then
+    log "فقط پشته RTL / فونت"
     install_rtl_stack
   else
-    warn "برای فونت و RTL:  bash scripts/install.sh --with-rtl"
-    warn "یا:  curl -fsSL .../install.sh | bash -s -- --with-rtl"
+    log "نصب faman"
+    if [[ "$SKIP_DEPS" -eq 0 ]]; then
+      install_deps
+    fi
+    install_faman
+    if [[ "$WITH_RTL" -eq 1 ]]; then
+      install_rtl_stack
+    else
+      warn "فونت و RTL: curl ... | bash -s -- --with-rtl"
+    fi
   fi
 
   cat <<EOF
 
 ┌─────────────────────────────────────────────
-│  نصب تمام شد
+│  تمام شد
 │
 │  امتحان:
 │    faman ls
 │    faman search docker
 │    FAMAN_PLAIN=1 faman echo
 │
-│  راهنمای فارسی در ترمینال:
-│    https://github.com/erfankasraie/Faman/blob/main/docs/terminal-persian.md
+│  یک‌بار فونت ترمینال را دستی تنظیم کنید:
+│    cat ~/.config/faman/terminal-font-hint.txt
+│
+│  docs: https://github.com/erfankasraie/Faman/blob/main/docs/install.md
 └─────────────────────────────────────────────
 EOF
 }
