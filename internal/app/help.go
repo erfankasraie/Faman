@@ -1,24 +1,20 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+
+	"github.com/faman-project/faman/internal/renderer"
 )
 
 var helpCmd = &cobra.Command{
 	Use:   "help [command]",
-	Short: "راهنمای استفاده از faman",
-	Long:  `نمایش راهنمای کامل faman یا یک زیر‌دستور خاص.`,
+	Short: "راهنمای faman",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			_ = rootCmd.Help()
-			return
-		}
-		// Find and show help for subcommand
-		c, _, err := rootCmd.Find(args)
-		if err != nil || c == nil {
-			_ = rootCmd.Help()
-			return
-		}
-		_ = c.Help()
+		useColor := renderer.ColorEnabled()
+		renderer.PrintBanner(useColor)
+		fmt.Println()
+		_ = rootCmd.Help()
 	},
 }

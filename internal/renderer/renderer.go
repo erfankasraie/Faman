@@ -15,8 +15,7 @@ import (
 )
 
 // Render displays a page beautifully in the terminal.
-// Persian/Arabic text is sensitive to mid-word wrapping (breaks glyph joining).
-// We soft-wrap only on spaces and offer FAMAN_PLAIN / FAMAN_WRAP controls.
+// Logo is injected here — never required inside markdown translations.
 func Render(page *parser.Page) error {
 	warnIfBadLocale()
 
@@ -40,7 +39,6 @@ func Render(page *parser.Page) error {
 
 	var mdRenderer *glamour.TermRenderer
 	if useColor && !plain && wrapEnabled() {
-		// Keep wrap width generous; Persian words must not be split mid-token.
 		wr := width - 2
 		if wr < 40 {
 			wr = 40
@@ -73,14 +71,12 @@ func Render(page *parser.Page) error {
 			return
 		}
 		if mdRenderer != nil && !containsArabicScript(body) {
-			// Latin-heavy sections (code-only) can use glamour safely.
 			out, err := mdRenderer.Render(body)
 			if err == nil {
 				fmt.Print(out)
 				return
 			}
 		}
-		// Persian-aware path: wrap only at spaces, preserve code fences.
 		printPersianSafe(body, width-2)
 	}
 
@@ -131,10 +127,15 @@ func warnIfBadLocale() {
 	if strings.Contains(combined, "utf-8") || strings.Contains(combined, "utf8") {
 		return
 	}
-	// Non-UTF-8 locales often show Persian as mojibake (توهم حروف).
-	fmt.Fprintln(os.Stderr, "faman: هشدار — locale شما UTF-8 نیست؛ ممکن است حروف فارسی خراب دیده شوند.")
-	fmt.Fprintln(os.Stderr, "  پیشنهاد: export LANG=en_US.UTF-8   یا   export LC_ALL=fa_IR.UTF-8")
-	fmt.Fprintln(os.Stderr, "  راهنما: docs/terminal-persian.md  |  حالت ساده: FAMAN_PLAIN=1 faman <cmd>")
+	msg := "faman: هشدار — locale شما UTF-8 نیست؛ ممکن است حروف فارسی خراب دیده شوند."
+	hint := "  پیشنهاد: export LANG=en_US.UTF-8   |  FAMAN_PLAIN=1 faman <cmd>"
+	if ColorEnabled() && !plainMode() {
+		fmt.Fprintln(os.Stderr, WarningStyle.Render(msg))
+		fmt.Fprintln(os.Stderr, DimStyle.Render(hint))
+	} else {
+		fmt.Fprintln(os.Stderr, msg)
+		fmt.Fprintln(os.Stderr, hint)
+	}
 }
 
 func containsArabicScript(s string) bool {
@@ -142,7 +143,6 @@ func containsArabicScript(s string) bool {
 		if unicode.In(r, unicode.Arabic, unicode.Inherited) {
 			return true
 		}
-		// Persian additions in Arabic block are covered; also check presentation forms range.
 		if r >= 0x0600 && r <= 0x06FF {
 			return true
 		}
@@ -163,7 +163,6 @@ func printPlainBody(body string) {
 	fmt.Println()
 }
 
-// printPersianSafe prints markdown-ish body without splitting Persian words.
 func printPersianSafe(body string, width int) {
 	if width < 20 {
 		width = 20
@@ -181,7 +180,6 @@ func printPersianSafe(body string, width int) {
 			fmt.Println(line)
 			continue
 		}
-		// Tables and headings: print as-is (avoid breaking | columns).
 		if strings.HasPrefix(trimmed, "|") || strings.HasPrefix(trimmed, "#") {
 			fmt.Println(line)
 			continue
@@ -193,7 +191,6 @@ func printPersianSafe(body string, width int) {
 	fmt.Println()
 }
 
-// softWrap breaks only on whitespace; never mid-token (protects Arabic joining).
 func softWrap(s string, width int) []string {
 	if runewidth.StringWidth(s) <= width {
 		return []string{s}
@@ -230,11 +227,10 @@ func softWrap(s string, width int) []string {
 }
 
 func renderHeader(page *parser.Page, width int, useColor bool) {
-	glyph := "∧"
-	titleLine := fmt.Sprintf("%s  %s", glyph, page.Title)
+	// Brand mark is always from the CLI — translations only supply title/body.
+	titleLine := headerTitleLine(page.Title)
 
 	if useColor {
-		// Avoid fixed Width() — miscalculated for some Unicode fonts and clips text.
 		box := BoxStyle.Render(TitleStyle.Render(titleLine))
 		fmt.Println(box)
 	} else {
@@ -275,7 +271,7 @@ func renderHeader(page *parser.Page, width int, useColor bool) {
 }
 
 func renderFooter(page *parser.Page, useColor bool) {
-	hint := fmt.Sprintf("faman search %s  ·  faman help", page.Title)
+	hint := fmt.Sprintf("%s  faman search %s  ·  faman help", GlyphOne, page.Title)
 	if useColor {
 		fmt.Println(FooterStyle.Render("─────────────────────────────────────"))
 		fmt.Println(FooterStyle.Render(hint))

@@ -13,7 +13,9 @@ var versionCmd = &cobra.Command{
 	Short: "نمایش نسخه faman",
 	Run: func(cmd *cobra.Command, args []string) {
 		useColor := renderer.ColorEnabled()
-		line := fmt.Sprintf("∧  faman  %s", version)
+		renderer.PrintBanner(useColor)
+		fmt.Println()
+		line := fmt.Sprintf("%s  faman  %s", renderer.GlyphOne, version)
 		if useColor {
 			fmt.Println(renderer.TitleStyle.Render(line))
 			fmt.Println(renderer.DimStyle.Render("   Persian Manual Pages"))
