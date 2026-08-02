@@ -116,28 +116,6 @@ func wrapEnabled() bool {
 	return true
 }
 
-func warnIfBadLocale() {
-	lang := os.Getenv("LANG")
-	lc := os.Getenv("LC_ALL")
-	lcctype := os.Getenv("LC_CTYPE")
-	combined := strings.ToLower(lang + " " + lc + " " + lcctype)
-	if combined == "" {
-		return
-	}
-	if strings.Contains(combined, "utf-8") || strings.Contains(combined, "utf8") {
-		return
-	}
-	msg := "faman: هشدار — locale شما UTF-8 نیست؛ ممکن است حروف فارسی خراب دیده شوند."
-	hint := "  پیشنهاد: export LANG=en_US.UTF-8   |  FAMAN_PLAIN=1 faman <cmd>"
-	if ColorEnabled() && !plainMode() {
-		fmt.Fprintln(os.Stderr, WarningStyle.Render(msg))
-		fmt.Fprintln(os.Stderr, DimStyle.Render(hint))
-	} else {
-		fmt.Fprintln(os.Stderr, msg)
-		fmt.Fprintln(os.Stderr, hint)
-	}
-}
-
 func containsArabicScript(s string) bool {
 	for _, r := range s {
 		if unicode.In(r, unicode.Arabic, unicode.Inherited) {
@@ -227,7 +205,6 @@ func softWrap(s string, width int) []string {
 }
 
 func renderHeader(page *parser.Page, width int, useColor bool) {
-	// Brand mark is always from the CLI — translations only supply title/body.
 	titleLine := headerTitleLine(page.Title)
 
 	if useColor {
