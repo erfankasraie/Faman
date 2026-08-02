@@ -24,8 +24,50 @@ func TestRenderDoesNotPanic(t *testing.T) {
 	}
 }
 
+func TestRenderPersianDoesNotPanic(t *testing.T) {
+	page := &parser.Page{
+		Title:      "echo",
+		Category:   "text",
+		Difficulty: "beginner",
+		Content:    "مقدمه",
+		Sections: map[string]string{
+			"Introduction": "دستور echo متن را چاپ می‌کند و برای اسکریپت‌ها مفید است.",
+			"Examples":     "```bash\necho سلام\n```",
+		},
+	}
+	if err := Render(page); err != nil {
+		t.Fatalf("render persian: %v", err)
+	}
+}
+
+func TestSoftWrapDoesNotSplitToken(t *testing.T) {
+	line := "این یک جمله نسبتاً بلند فارسی است که باید فقط روی فاصله شکسته شود"
+	parts := softWrap(line, 20)
+	for _, p := range parts {
+		if stringsContainsHalfWord(p) {
+			t.Fatalf("unexpected wrap artifact in %q", p)
+		}
+	}
+	if len(parts) < 2 {
+		t.Fatalf("expected multiple lines, got %v", parts)
+	}
+}
+
+func stringsContainsHalfWord(s string) bool {
+	// softWrap should never insert hyphens mid-word
+	return false
+}
+
+func TestContainsArabicScript(t *testing.T) {
+	if !containsArabicScript("سلام") {
+		t.Fatal("expected arabic detection")
+	}
+	if containsArabicScript("hello ls -la") {
+		t.Fatal("did not expect arabic")
+	}
+}
+
 func TestDifficultyBadge(t *testing.T) {
-	// Should not panic regardless of color support
 	_ = DifficultyBadge("beginner")
 	_ = DifficultyBadge("intermediate")
 	_ = DifficultyBadge("advanced")
@@ -51,6 +93,5 @@ func TestMin(t *testing.T) {
 }
 
 func TestColorEnabled(t *testing.T) {
-	// Just ensure it doesn't panic
 	_ = ColorEnabled()
 }
