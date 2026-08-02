@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (e.g. v0.1.3-pre)'
+        description: 'Tag to release (e.g. v0.1.3)'
         required: true
-        default: 'v0.1.3-pre'
+        default: 'v0.1.3'
       prerelease:
-        description: 'Mark as pre-release'
+        description: 'Mark as release'
         type: boolean
         default: true
 
