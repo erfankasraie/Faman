@@ -20,28 +20,21 @@
 
 ## نصب با یک کپی‌پیست
 
-### فقط faman
+### Linux / macOS
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash
-```
-
-### faman + فونت فارسی + UTF-8 + کمک RTL (پیشنهادی روی Ubuntu)
-
-```bash
+# با فونت و RTL:
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash -s -- --with-rtl
 ```
 
-### فقط فونت / locale / RTL (اگر faman را دارید)
+### Windows (PowerShell) — همان `main`
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/setup-rtl.sh | bash
+```powershell
+irm https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.ps1 | iex
 ```
 
-بعد از `--with-rtl` یک‌بار در **GNOME Terminal** فونت پروفایل را روی `Vazirmatn` یا `DejaVu Sans Mono` بگذارید (اسکریپت خودش GUI را عوض نمی‌کند).
-
-راهنمای کامل نصب: [docs/install.md](docs/install.md)  
-نمایش فارسی در ترمینال: [docs/terminal-persian.md](docs/terminal-persian.md)
+راهنما: [docs/windows.md](docs/windows.md) · فارسی در ترمینال: [docs/terminal-persian.md](docs/terminal-persian.md) · نصب کامل: [docs/install.md](docs/install.md)
 
 ---
 
@@ -51,7 +44,7 @@ curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/set
 faman ls
 faman search docker
 faman grep
-FAMAN_PLAIN=1 faman echo   # اگر حروف خراب دیده می‌شود
+FAMAN_PLAIN=1 faman echo
 ```
 
 ---
@@ -59,65 +52,26 @@ FAMAN_PLAIN=1 faman echo   # اگر حروف خراب دیده می‌شود
 ## Features
 
 - `faman <command>` — راهنمای فارسی دستور
-- `faman search <query>` — جستجو
-- `faman version` / `help` / `update`
-- بیش از ۱۰۰ صفحه فارسی
-- رندر امن‌تر برای متن فارسی (`FAMAN_PLAIN` / `FAMAN_WRAP`)
+- `faman search` / `version` / `help` / `completion`
+- ۱۰۰+ صفحه فارسی
+- لینوکس، macOS و **ویندوز** (مسیر LocalAppData + Windows Terminal)
+- `FAMAN_PLAIN` / `FAMAN_WRAP` برای ترمینال‌های ضعیف
 
 ---
 
-## نصب دستی (بدون اسکریپت)
-
-```bash
-git clone https://github.com/erfankasraie/Faman.git
-cd Faman
-make build
-sudo make install
-# یا:
-# bash scripts/install.sh --with-rtl
-```
-
-### وابستگی‌ها
-
-| توزیع | دستور |
-|--------|--------|
-| Ubuntu / Debian | `sudo apt install git golang-go make` |
-| Fedora | `sudo dnf install git golang make` |
-| Arch | `sudo pacman -S git go make` |
-
-اگر Go قدیمی بود: `sudo snap install go --classic`
-
-### مسیر صفحات
+## مسیر صفحات
 
 1. `FAMAN_PAGES`
-2. کنار باینری
-3. `/usr/local/share/faman/pages/fa`
-4. `/usr/share/faman/pages/fa`
-5. پوشه جاری (توسعه)
-
----
-
-## Uninstall
-
-```bash
-sudo rm -f /usr/local/bin/faman
-sudo rm -rf /usr/local/share/faman
-```
+2. کنار باینری `pages/fa`
+3. لینوکس: `/usr/local/share/faman/pages/fa` — ویندوز: `%LOCALAPPDATA%\faman\pages\fa`
+4. پوشه جاری (توسعه)
 
 ---
 
 ## مشارکت
 
-[CONTRIBUTING.md](CONTRIBUTING.md) — قالب صفحات و استانداردها.
-
-## Roadmap
-
-جزئیات: [ROADMAP.md](ROADMAP.md)
+[CONTRIBUTING.md](CONTRIBUTING.md) · [ROADMAP.md](ROADMAP.md)
 
 ## License
 
 MIT — [LICENSE](LICENSE)
-
----
-
-ساخته شده با ♥ برای جامعه لینوکس فارسی

@@ -24,55 +24,6 @@ type Page struct {
 	FilePath   string
 }
 
-// pagesDir returns the directory containing markdown pages.
-// Search order:
-//  1. FAMAN_PAGES env var
-//  2. Next to the executable
-//  3. Standard system share directories
-//  4. Current working directory (development)
-func pagesDir() (string, error) {
-	// 1. Explicit environment variable
-	if env := os.Getenv("FAMAN_PAGES"); env != "" {
-		if st, err := os.Stat(env); err == nil && st.IsDir() {
-			return env, nil
-		}
-	}
-
-	var candidates []string
-
-	// 2. Relative to executable
-	if exe, err := os.Executable(); err == nil {
-		exeDir := filepath.Dir(exe)
-		candidates = append(candidates,
-			filepath.Join(exeDir, "pages", "fa"),
-			filepath.Join(exeDir, "..", "pages", "fa"),
-			filepath.Join(exeDir, "..", "share", "faman", "pages", "fa"),
-		)
-	}
-
-	// 3. Standard FHS locations
-	candidates = append(candidates,
-		"/usr/local/share/faman/pages/fa",
-		"/usr/share/faman/pages/fa",
-		"/opt/faman/pages/fa",
-	)
-
-	// 4. Development / current directory
-	if cwd, err := os.Getwd(); err == nil {
-		candidates = append(candidates,
-			filepath.Join(cwd, "pages", "fa"),
-			filepath.Join(cwd, "..", "pages", "fa"),
-		)
-	}
-
-	for _, dir := range candidates {
-		if st, err := os.Stat(dir); err == nil && st.IsDir() {
-			return dir, nil
-		}
-	}
-	return "", fmt.Errorf("pages directory not found (set FAMAN_PAGES or install pages to /usr/local/share/faman/pages/fa)")
-}
-
 // LoadPage loads a page by name or alias.
 func LoadPage(name string) (*Page, error) {
 	dir, err := pagesDir()
@@ -82,13 +33,11 @@ func LoadPage(name string) (*Page, error) {
 
 	name = strings.ToLower(strings.TrimSpace(name))
 
-	// Direct file match
 	path := filepath.Join(dir, name+".md")
 	if _, err := os.Stat(path); err == nil {
 		return parseFile(path)
 	}
 
-	// Search by alias
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -158,9 +107,7 @@ func parseFile(path string) (*Page, error) {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 
-	// Extract sections
 	extractSections(body, page)
-
 	return page, nil
 }
 
@@ -253,7 +200,6 @@ func extractSections(body []byte, page *Page) {
 		}
 	}
 
-	// Walk always returns nil error with this visitor; still check for errcheck.
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
