@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] — 2026-08-02
+
+### Added
+
+- نقطه ورود `cmd/faman/main.go` (پروژه اکنون به‌درستی build می‌شود)
+- صفحات جدید: `echo`, `ps`, `top`, `df`, `free`, `kill`, `ping`, `nano`, `apt`, `systemctl`
+- محتوای ویکی در `docs/wiki/` (Home و Roadmap)
+- گسترش `ROADMAP.md` با فاز v0.1.x و اولویت‌های کوتاه‌مدت
+
+### Fixed
+
+- `internal/update/update.go` اکنون از `strings.Repeat` استاندارد استفاده می‌کند
+
 ## [0.1.0] — 2026-08-01
 
 ### Added

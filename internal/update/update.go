@@ -2,6 +2,7 @@ package update
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/faman-project/faman/internal/renderer"
 )
@@ -14,7 +15,7 @@ func Run() error {
 	title := "∧  به‌روزرسانی"
 	if useColor {
 		fmt.Println(renderer.TitleStyle.Render(title))
-		fmt.Println(renderer.DimStyle.Render(stringsRepeat("─", 36)))
+		fmt.Println(renderer.DimStyle.Render(strings.Repeat("─", 36)))
 		fmt.Println()
 		fmt.Println(renderer.MetaStyle.Render("  به‌روزرسانی آنلاین در نسخه فعلی پشتیبانی نمی‌شود."))
 		fmt.Println()
@@ -33,12 +34,4 @@ func Run() error {
 		fmt.Println("  git pull origin main")
 	}
 	return nil
-}
-
-func stringsRepeat(s string, n int) string {
-	out := ""
-	for i := 0; i < n; i++ {
-		out += s
-	}
-	return out
 }
