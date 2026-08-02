@@ -45,7 +45,7 @@ var (
 
 	BoxStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
-			BorderForeground(colorPrimary).
+			BorderForeground(colorBorder).
 			Padding(0, 1).
 			MarginBottom(0)
 
@@ -99,9 +99,6 @@ var (
 	FooterStyle = lipgloss.NewStyle().
 			Foreground(colorMuted).
 			MarginTop(1)
-
-	// colorBorder reserved for future panels / secondary boxes
-	_ = colorBorder
 )
 
 // ColorEnabled reports whether ANSI colors should be used.
@@ -147,8 +144,6 @@ func SectionIcon(name string) string {
 		return "⚠"
 	case "Tips", "نکات":
 		return "★"
-	case "Related commands", "دستورات مرتبط":
-		return "→"
 	default:
 		return "•"
 	}
