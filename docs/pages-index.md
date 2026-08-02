@@ -1,6 +1,33 @@
 # فهرست صفحات faman
 
-حدود **۱۲۴** صفحهٔ فارسی (به‌روز پس از افزودن مدیران بسته).
+حدود **۱۳۴** صفحهٔ فارسی.
+
+---
+
+## محیط‌های مجازی و نسخه (Virtual environments)
+
+| دستور | کاربرد | سطح |
+|--------|--------|------|
+| `venv` | محیط مجازی استاندارد Python | مبتدی |
+| `virtualenv` | محیط مجازی کلاسیک Python | مبتدی |
+| `pipenv` | Pipfile + env | متوسط |
+| `poetry` | وابستگی + lock + env | متوسط |
+| `conda` | Anaconda / Miniconda / mamba | متوسط |
+| `pyenv` | چند نسخهٔ Python | متوسط |
+| `nvm` | چند نسخهٔ Node.js | مبتدی |
+| `asdf` | version manager چندزبانه | متوسط |
+| `direnv` | بارگذاری خودکار `.envrc` | متوسط |
+| `docker` | کانتینر (ایزولهٔ کامل) | — |
+| `podman` | کانتینر rootless | متوسط |
+| `nix` | بسته/محیط اعلانی | پیشرفته |
+
+```bash
+faman venv
+faman poetry
+faman conda
+faman nvm
+faman direnv
+```
 
 ---
 
@@ -23,14 +50,6 @@
 | `pip` | Python / PyPI | مبتدی |
 | `npm` | Node.js | مبتدی |
 | `cargo` | Rust / crates | مبتدی |
-
-```bash
-faman apt
-faman dnf
-faman pacman
-faman snap
-faman pip
-```
 
 ---
 
