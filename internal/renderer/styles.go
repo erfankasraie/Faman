@@ -9,16 +9,16 @@ import (
 
 // Palette — purple/cyan inspired by the project identity
 var (
-	colorPrimary   = lipgloss.Color("#7C3AED") // violet
-	colorAccent    = lipgloss.Color("#06B6D4") // cyan
-	colorMuted     = lipgloss.Color("#94A3B8") // slate
-	colorSuccess   = lipgloss.Color("#10B981") // emerald
-	colorWarning   = lipgloss.Color("#F59E0B") // amber
-	colorError     = lipgloss.Color("#EF4444") // red
-	colorBeginner  = lipgloss.Color("#22C55E")
-	colorIntermed  = lipgloss.Color("#EAB308")
-	colorAdvanced  = lipgloss.Color("#EF4444")
-	colorBorder    = lipgloss.Color("#4C1D95")
+	colorPrimary  = lipgloss.Color("#7C3AED") // violet
+	colorAccent   = lipgloss.Color("#06B6D4") // cyan
+	colorMuted    = lipgloss.Color("#94A3B8") // slate
+	colorSuccess  = lipgloss.Color("#10B981") // emerald
+	colorWarning  = lipgloss.Color("#F59E0B") // amber
+	colorError    = lipgloss.Color("#EF4444") // red
+	colorBeginner = lipgloss.Color("#22C55E")
+	colorIntermed = lipgloss.Color("#EAB308")
+	colorAdvanced = lipgloss.Color("#EF4444")
+	colorBorder   = lipgloss.Color("#4C1D95")
 )
 
 // Styles
@@ -82,6 +82,10 @@ var (
 			Foreground(colorError).
 			Bold(true)
 
+	WarningStyle = lipgloss.NewStyle().
+			Foreground(colorWarning).
+			Bold(true)
+
 	SuccessStyle = lipgloss.NewStyle().
 			Foreground(colorSuccess)
 
@@ -95,6 +99,9 @@ var (
 	FooterStyle = lipgloss.NewStyle().
 			Foreground(colorMuted).
 			MarginTop(1)
+
+	// colorBorder reserved for future panels / secondary boxes
+	_ = colorBorder
 )
 
 // ColorEnabled reports whether ANSI colors should be used.

@@ -253,7 +253,8 @@ func extractSections(body []byte, page *Page) {
 		}
 	}
 
-	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	// Walk always returns nil error with this visitor; still check for errcheck.
+	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
