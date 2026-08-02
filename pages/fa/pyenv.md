@@ -11,7 +11,7 @@ keywords:
 
 # Introduction
 
-`pyenv` چند نسخهٔ **Python** را کنار هم نصب و با shim بین آن‌ها جابه‌جا می‌کند (سراسری، هر پوشه، یا شل).
+`pyenv` چند نسخهٔ **Python** را نصب و بین آن‌ها جابه‌جا می‌کند.
 
 # Syntax
 
@@ -23,36 +23,53 @@ pyenv <command> [args]
 
 | دستور | توضیح |
 |-------|--------|
-| `install -l` | نسخه‌های قابل نصب |
-| `install 3.12.0` | نصب نسخه |
-| `versions` | نصب‌شده‌ها |
+| `install VER` | نصب نسخه |
+| `versions` | لیست |
 | `global VER` | پیش‌فرض کاربر |
-| `local VER` | برای این پوشه (`.python-version`) |
+| `local VER` | برای پوشه |
 | `shell VER` | فقط این نشست |
 
 # Examples
 
+## دو پروژه، دو نسخه
+
 ```bash
+pyenv install 3.11.8
 pyenv install 3.12.2
-pyenv global 3.12.2
-cd myproject
+
+mkdir -p ~/work/legacy ~/work/new
+
+cd ~/work/legacy
 pyenv local 3.11.8
+python -m venv .venv && source .venv/bin/activate
+pip install django==3.2
+
+cd ~/work/new
+pyenv local 3.12.2
+python -m venv .venv && source .venv/bin/activate
+pip install django
+
+# فایل .python-version را commit کنید تا تیم هماهنگ شود
+```
+
+## تست سریع یک نسخه
+
+```bash
+pyenv shell 3.12.2
 python -V
-python -m venv .venv
+# خروج از shell override با بستن ترمینال یا:
+pyenv shell --unset
 ```
 
 # Common mistakes
 
-- فراموش کردن init در shell rc (`pyenv init`).
-- انتظار که pyenv به‌جای venv وابستگی پروژه را مدیریت کند — فقط نسخهٔ مفسر را عوض می‌کند.
+- نبودن `eval "$(pyenv init -)"` در rc.
+- انتظار مدیریت بسته‌ها بدون venv.
 
 # Tips
 
-- ترکیب رایج: **pyenv** (نسخه) + **venv/poetry** (بسته‌ها).
-- افزونه `pyenv-virtualenv` برای مدیریت envها.
+- ترکیب طلایی: **pyenv** (نسخه) + **venv/poetry** (بسته).
 
 # Related commands
 
-- `venv`
-- `asdf` — چندزبانه‌تر
-- `conda`
+- `venv` · `asdf` · `conda`

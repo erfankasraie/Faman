@@ -12,7 +12,7 @@ keywords:
 
 # Introduction
 
-`nvm` (Node Version Manager) چند نسخهٔ **Node.js** را برای کاربر نصب و بین آن‌ها سوییچ می‌کند.
+`nvm` چند نسخهٔ **Node.js** را برای کاربر نصب و بین آن‌ها سوییچ می‌کند.
 
 # Syntax
 
@@ -24,38 +24,64 @@ nvm <command> [version]
 
 | دستور | توضیح |
 |-------|--------|
-| `install VER` | نصب (مثلاً `20` یا `lts`) |
+| `install VER` | نصب |
 | `use VER` | فعال در این شل |
 | `alias default VER` | پیش‌فرض |
-| `ls` | نسخه‌های محلی |
-| `ls-remote` | نسخه‌های دور |
+| `ls` / `ls-remote` | لیست محلی/دور |
 | `uninstall VER` | حذف |
 
 # Examples
 
-```bash
-nvm install --lts
-nvm use 20
-node -v && npm -v
-nvm alias default 20
+## پروژهٔ Node با نسخهٔ ثابت تیم
 
-# در پروژه با .nvmrc:
+```bash
+mkdir web && cd web
+nvm install 20
+nvm use 20
+node -v
+
 echo "20" > .nvmrc
-nvm use
+npm init -y
+npm install express
+
+cat > server.js <<'EOF'
+const express = require("express");
+const app = express();
+app.get("/", (_req, res) => res.send("ok"));
+app.listen(3000, () => console.log("http://127.0.0.1:3000"));
+EOF
+
+node server.js
+```
+
+## سوییچ بین دو نسخه
+
+```bash
+nvm install 18
+nvm install 22
+nvm use 18 && node -v
+nvm use 22 && node -v
+nvm alias default 20
+```
+
+## ورود به پوشه با `.nvmrc`
+
+```bash
+cd web
+nvm use          # از .nvmrc می‌خواند
+npm test
 ```
 
 # Common mistakes
 
-- نصب Node با apt و nvm هم‌زمان و قاطی شدن PATH.
-- فراموش کردن بارگذاری nvm در `~/.bashrc` / `~/.zshrc`.
+- Node apt + nvm هم‌زمان روی PATH.
+- نبودن `nvm` در shell rc.
 
 # Tips
 
-- برای تیم: فایل `.nvmrc` در ریشهٔ ریپو.
-- جایگزین‌ها: `fnm`، `asdf`، `n`.
+- CI: نسخه را از `.nvmrc` بخوانید.
+- جایگزین سبک: `fnm`.
 
 # Related commands
 
-- `npm` / `npx`
-- `asdf`
-- `pyenv` — معادل پایتون
+- `npm` · `npx` · `asdf` · `pyenv`
