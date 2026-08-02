@@ -5,12 +5,11 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd || true)"
-if [[ -n "${ROOT:-}" && -x "$ROOT/scripts/install.sh" ]]; then
-  exec bash "$ROOT/scripts/install.sh" --with-rtl --skip-deps "$@"
+if [[ -n "${ROOT:-}" && -f "$ROOT/scripts/install.sh" ]]; then
+  exec bash "$ROOT/scripts/install.sh" --rtl-only "$@"
 fi
 
-# اگر از curl آمده و مخزن لوکال نیست:
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh -o "$TMP/install.sh"
-bash "$TMP/install.sh" --with-rtl --skip-deps "$@"
+bash "$TMP/install.sh" --rtl-only "$@"
