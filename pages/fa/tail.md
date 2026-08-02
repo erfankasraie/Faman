@@ -5,14 +5,13 @@ category: text
 difficulty: beginner
 keywords:
 - end
-- file
-- lines
 - follow
+- log
 ---
 
 # Introduction
 
-دستور `tail` انتهای یک فایل را نمایش می‌دهد (پیش‌فرض ۱۰ خط آخر). حالت follow آن برای دنبال کردن لاگ‌ها بسیار محبوب است.
+`tail` انتهای فایل را نشان می‌دهد؛ با `-f` برای دنبال کردن لاگ زنده استفاده می‌شود.
 
 # Syntax
 
@@ -25,41 +24,29 @@ tail [OPTIONS] [FILE...]
 | گزینه | توضیح |
 |-------|--------|
 | `-n N` | N خط آخر |
+| `-f` | follow |
+| `-F` | follow + تلاش مجدد اگر فایل عوض شد |
 | `-c N` | N بایت آخر |
-| `-f` | follow — منتظر داده‌های جدید بمان |
-| `-F` | مثل `-f` اما فایل را بعد از rotate دوباره باز می‌کند |
-| `--pid=PID` | همراه با `-f`، وقتی پروسس تمام شد خارج شو |
 
 # Examples
 
 ```bash
-# ۱۰ خط آخر
 tail file.txt
-
-# ۵۰ خط آخر
-tail -n 50 app.log
-
-# دنبال کردن لاگ به صورت زنده
-tail -f /var/log/syslog
-
-# دنبال کردن با reopen بعد از rotate
-tail -F /var/log/nginx/access.log
+tail -n 50 /var/log/syslog
+tail -f /var/log/nginx/access.log
+tail -n +10 file.txt    # از خط ۱۰ تا آخر
 ```
 
 # Common mistakes
 
-- استفاده از `-f` روی فایلی که rotate می‌شود بدون `-F`.
-- فراموش کردن خروج از حالت follow با Ctrl+C.
+- `tail -f` روی فایلی که rotate می‌شود بدون `-F`.
 
 # Tips
 
-- `tail -f` یکی از پرکاربردترین دستورات برای مانیتورینگ است.
-- می‌توانید چند فایل را همزمان follow کنید.
-- ترکیب با `grep`: `tail -f app.log | grep ERROR`
+- چند فایل: `tail -f a.log b.log`
 
 # Related commands
 
-- `head` — ابتدای فایل
-- `less +F` — follow با قابلیت اسکرول
-- `journalctl -f` — برای systemd logs
-- `multitail` — follow چند فایل با UI بهتر
+- `head`
+- `less` + `F`
+- `journalctl -f`

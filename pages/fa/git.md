@@ -12,7 +12,7 @@ keywords:
 
 # Introduction
 
-`git` سیستم کنترل نسخه توزیع‌شده است که تقریباً استاندارد صنعت نرم‌افزار شده. این صفحه خلاصه‌ای از پرکاربردترین دستورات است.
+`git` سیستم کنترل نسخه توزیع‌شده و استاندارد رایج توسعه نرم‌افزار است. این صفحه پرکاربردترین فرمان‌ها را جمع می‌کند.
 
 # Syntax
 
@@ -20,89 +20,47 @@ keywords:
 git <command> [<args>]
 ```
 
-# دستورات اصلی
+# Options
 
-## شروع کار
-
-```bash
-git init                  # ساخت مخزن جدید
-git clone URL             # کلون کردن مخزن
-```
-
-## وضعیت و تاریخچه
-
-```bash
-git status                # وضعیت فایل‌ها
-git log                   # تاریخچه کامیت‌ها
-git log --oneline --graph # نمای فشرده
-git diff                  # تغییرات stage‌نشده
-git diff --staged         # تغییرات stage‌شده
-```
-
-## تغییرات
-
-```bash
-git add FILE              # اضافه به stage
-git add .                 # همه تغییرات
-git commit -m "message"   # ثبت کامیت
-git commit -am "message"  # add + commit برای فایل‌های tracked
-```
-
-## شاخه‌ها
-
-```bash
-git branch                # لیست شاخه‌ها
-git branch NAME           # ساخت شاخه
-git checkout NAME         # جابه‌جایی
-git switch NAME           # جابه‌جایی (جدیدتر)
-git merge BRANCH          # ادغام
-git branch -d NAME        # حذف شاخه
-```
-
-## ارتباط با ریموت
-
-```bash
-git remote -v             # لیست ریموت‌ها
-git fetch                 # دریافت تغییرات بدون ادغام
-git pull                  # fetch + merge
-git push                  # ارسال به ریموت
-git push -u origin BRANCH # اولین push با upstream
-```
+| فرمان | توضیح |
+|-------|--------|
+| `init` / `clone` | شروع یا کلون |
+| `status` / `log` / `diff` | وضعیت و تاریخچه |
+| `add` / `commit` | ثبت تغییرات |
+| `branch` / `switch` / `merge` | شاخه |
+| `fetch` / `pull` / `push` | ریموت |
+| `restore` / `stash` | بازگردانی موقت |
 
 # Examples
 
 ```bash
-# گردش کار روزانه
+git clone https://github.com/erfankasraie/Faman.git
 git status
 git add .
 git commit -m "Fix login bug"
 git push
 
-# ساخت و سوییچ به شاخه جدید
 git switch -c feature/login
-
-# بازگردانی تغییرات stage‌نشده
+git log --oneline --graph
 git restore file.txt
+git stash && git stash pop
 ```
 
 # Common mistakes
 
-- `git add .` بدون بررسی `git status`.
-- کامیت روی `main`/`master` به جای شاخه feature.
-- force push روی شاخه‌های اشتراکی.
-- فراموش کردن `.gitignore`.
+- `git add .` بدون دیدن `status`.
+- کامیت مستقیم روی main به‌جای feature branch.
+- force push روی شاخه اشتراکی.
+- نبودن `.gitignore` مناسب.
 
 # Tips
 
-- پیام کامیت را واضح و به زبان حال بنویسید.
-- از `git stash` برای کنار گذاشتن موقت تغییرات استفاده کنید.
-- `git config --global` برای تنظیمات دائمی.
-- ابزارهایی مثل `lazygit` یا `tig` تجربه بهتری می‌دهند.
-- همیشه قبل از push مهم `git log` و `git diff` را چک کنید.
+- پیام کامیت کوتاه و واضح.
+- قبل از push: `git log` و `git diff`.
+- ابزار کمکی: `lazygit`, `delta`, `gh`.
 
 # Related commands
 
 - `gh` — GitHub CLI
-- `gitk` / `git gui`
-- `delta` — diff زیباتر
-- `pre-commit` — هوک‌های کیفیت کد
+- `diff` / `patch`
+- `make` — build

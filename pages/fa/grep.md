@@ -13,7 +13,7 @@ keywords:
 
 # Introduction
 
-دستور `grep` برای جستجوی متن داخل فایل‌ها استفاده می‌شود. نام آن از عبارت Global Regular Expression Print گرفته شده است.
+`grep` الگو را داخل فایل‌ها جستجو می‌کند. نامش از Global Regular Expression Print گرفته شده است.
 
 # Syntax
 
@@ -25,58 +25,44 @@ grep [OPTIONS] PATTERN [FILE...]
 
 | گزینه | توضیح |
 |-------|--------|
-| `-i` | بدون حساسیت به حروف بزرگ/کوچک |
-| `-r` یا `-R` | جستجوی بازگشتی در پوشه‌ها |
-| `-n` | نمایش شماره خط |
-| `-v` | خطوطی که مطابقت ندارند |
-| `-l` | فقط نام فایل‌های دارای مطابقت |
-| `-c` | تعداد مطابقت‌ها |
-| `-A N` | N خط بعد از مطابقت |
-| `-B N` | N خط قبل از مطابقت |
-| `-C N` | N خط قبل و بعد |
-| `-E` | استفاده از regex گسترش‌یافته |
-| `-w` | فقط کلمات کامل |
-| `--color=auto` | رنگ‌آمیزی نتایج |
+| `-i` | بدون حساسیت حروف |
+| `-r` / `-R` | بازگشتی |
+| `-n` | شماره خط |
+| `-v` | خطوط غیرمطابق |
+| `-l` | فقط نام فایل |
+| `-c` | تعداد |
+| `-A N` / `-B N` / `-C N` | context |
+| `-E` | regex توسعه‌یافته |
+| `-w` | کلمه کامل |
+| `--color=auto` | رنگ |
+| `--exclude-dir=DIR` | نادیده گرفتن پوشه |
 
 # Examples
 
 ```bash
-# جستجوی ساده
-grep "error" logfile.txt
-
-# بدون حساسیت به حروف + شماره خط
-grep -in "error" logfile.txt
-
-# جستجوی بازگشتی
-grep -r "TODO" src/
-
-# فقط نام فایل‌ها
-grep -rl "password" /etc/
-
-# با context
-grep -C 3 "exception" app.log
-
-# استفاده از regex
-grep -E "error|warning|fail" app.log
+grep 'error' logfile.txt
+grep -in 'error' logfile.txt
+grep -r 'TODO' src/
+grep -rl 'password' /etc/
+grep -C 3 'exception' app.log
+grep -E 'error|warning|fail' app.log
+grep -r --exclude-dir=.git --exclude-dir=node_modules 'FIXME' .
 ```
 
 # Common mistakes
 
-- فراموش کردن کوتیشن دور patternهای پیچیده.
-- استفاده از `grep -r` روی پوشه‌های خیلی بزرگ بدون محدودیت.
-- انتظار داشتن regex پیشرفته بدون `-E` یا `-P`.
+- pattern پیچیده بدون کوتیشن.
+- `grep -r` روی درخت عظیم بدون exclude.
+- انتظار regex پیشرفته بدون `-E` یا `-P`.
 
 # Tips
 
-- برای جستجوی پیشرفته‌تر از `rg` (ripgrep) استفاده کنید — بسیار سریع‌تر است.
-- می‌توانید خروجی را به `less` بدهید: `grep ... | less`
-- در ترکیب با `find`: `find . -name "*.py" | xargs grep -n "def "`
-- از `--exclude-dir` برای نادیده گرفتن پوشه‌هایی مثل `.git` و `node_modules` استفاده کنید.
+- جایگزین سریع: `rg` (ripgrep).
+- ترکیب: `grep ... | less`
+- با find: `find . -name '*.py' -print0 | xargs -0 grep -n 'def '`. 
 
 # Related commands
 
-- `rg` (ripgrep) — جایگزین سریع مدرن
-- `ag` (the silver searcher)
-- `ack`
-- `find` — جستجوی فایل
-- `sed` / `awk` — پردازش متن
+- `rg` / `ag`
+- `find`
+- `sed` / `awk`

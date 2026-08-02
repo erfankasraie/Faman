@@ -5,69 +5,53 @@ category: network
 difficulty: intermediate
 keywords:
 - copy
+- ssh
 - remote
-- secure
 - transfer
 ---
 
 # Introduction
 
-دستور `scp` (Secure Copy) برای کپی امن فایل بین ماشین‌های محلی و راه دور از طریق SSH استفاده می‌شود.
+`scp` (secure copy) فایل را روی SSH کپی می‌کند. برای همگام‌سازی پیشرفته‌تر `rsync` بهتر است.
 
 # Syntax
 
 ```
-scp [OPTIONS] SOURCE DEST
+scp [OPTIONS] SRC DEST
 ```
 
-SOURCE و DEST می‌توانند به فرم `user@host:path` باشند.
+SRC/DEST می‌تواند `user@host:path` باشد.
 
 # Options
 
 | گزینه | توضیح |
 |-------|--------|
-| `-r` | بازگشتی (پوشه‌ها) |
-| `-P PORT` | پورت SSH (توجه: P بزرگ) |
+| `-r` | بازگشتی (پوشه) |
+| `-P PORT` | پورت SSH |
 | `-i KEY` | کلید خصوصی |
 | `-C` | فشرده‌سازی |
-| `-p` | حفظ زمان و مجوز |
-| `-v` | verbose |
-| `-q` | ساکت |
+| `-p` | حفظ زمان/مجوز |
 
 # Examples
 
 ```bash
-# کپی فایل به سرور
-scp file.txt user@host:/home/user/
-
-# کپی از سرور به محلی
-scp user@host:/var/log/app.log ./
-
-# کپی پوشه
-scp -r project/ user@host:~/backups/
-
-# با پورت خاص
-scp -P 2222 file.txt user@host:~/
-
-# با کلید خاص
-scp -i ~/.ssh/mykey file.txt user@host:~/
+scp file.txt user@server:/tmp/
+scp -r project/ user@server:~/app/
+scp -P 2222 user@server:/var/log/app.log .
+scp -i ~/.ssh/id_ed25519 file.tar.gz user@host:~
 ```
 
 # Common mistakes
 
-- استفاده از `-p` به جای `-P` برای پورت.
-- فراموش کردن `-r` برای پوشه‌ها.
-- مسیرهای دارای فاصله بدون کوتیشن.
+- `-P` بزرگ برای پورت (در ssh کوچک `-p` است).
+- فراموش کردن `-r` برای پوشه.
 
 # Tips
 
-- برای همگام‌سازی و انتقال‌های بزرگ، `rsync` روی SSH بسیار بهتر است.
-- `scp` در نسخه‌های جدید OpenSSH از پروتکل SFTP استفاده می‌کند.
-- می‌توانید بین دو سرور راه دور هم کپی کنید (با محدودیت).
+- برای resume و sync: `rsync -avz -e ssh`.
 
 # Related commands
 
-- `rsync` — همگام‌سازی پیشرفته
-- `sftp` — انتقال تعاملی
-- `ssh` — اتصال شل
-- `rclone` — برای فضای ابری
+- `rsync`
+- `sftp`
+- `ssh`

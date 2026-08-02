@@ -5,42 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] — 2026-08-02
+
+### Added
+
+- ده‌ها صفحه جدید: `rsync`, `tmux`, `screen`, `crontab`, `ufw`, `jq`, `make`, `diff`, `patch`, `watch`, `time`, `basename`, `dirname`, `realpath`, `sha256sum`, `base64`, `alias`, `export`, `source`, `umask`, `chgrp`, `reboot`, `shutdown`, `who`, `last`, `getent`, `hostnamectl`, `timedatectl`, `nc`, `locate`, `yes`, `seq`, ...
+- راهنمای نمایش فارسی در ترمینال: `docs/terminal-persian.md`
+- حالت‌های `FAMAN_PLAIN` و `FAMAN_WRAP` برای کنترل خروجی
+
+### Changed
+
+- رندرر: soft-wrap امن برای فارسی (بدون شکستن وسط کلمه)، هشدار locale غیر UTF-8، حذف عرض ثابت باکس عنوان
+- یکدست‌سازی صفحات قدیمی (`cat`, `grep`, `chmod`, `git`, `head`, `tail`, `less`, `ssh`, `scp`, `find`, `docker`, `curl`) با قالب استاندارد بخش‌ها
+
 ## [0.1.2] — 2026-08-02
 
 ### Added
 
-- پوشش گستردهٔ دستورات رایج برای نزدیک شدن به حدود یک‌سوم ابزارهای هسته‌ای CLI
-- متن و شل: `sed`, `awk`, `sort`, `uniq`, `cut`, `tr`, `wc`, `tee`, `xargs`, `which`, `env`, `history`, `clear`
-- فایل‌سیستم: `ln`, `touch`, `du`, `file`, `stat`, `mount`, `umount`, `lsblk`
-- فرایند: `pgrep`, `pkill`, `nohup`, `jobs`
-- کاربر: `id`, `whoami`, `passwd`, `useradd`
-- شبکه: `ip`, `ss`, `dig`, `traceroute`, `hostname`
-- سیستم: `uname`, `uptime`, `date`, `sudo`, `journalctl`, `lsof`, `vim`
-- بسته و فشرده‌سازی: `dnf`, `pacman`, `gzip`, `gunzip`
-- به‌روزرسانی `ROADMAP.md` و فهرست صفحات
+- گسترش پوشش به حدود یک‌سوم دستورات رایج (~۸۰+ صفحه)
+- فهرست موضوعی `docs/pages-index.md`
 
 ## [0.1.1] — 2026-08-02
 
 ### Added
 
-- نقطه ورود `cmd/faman/main.go` (پروژه اکنون به‌درستی build می‌شود)
-- صفحات: `echo`, `ps`, `top`, `df`, `free`, `kill`, `ping`, `nano`, `apt`, `systemctl`
-- محتوای ویکی در `docs/wiki/`
-- گسترش `ROADMAP.md`
+- `cmd/faman/main.go`، صفحات اولیه بیشتر، `docs/wiki/`
 
 ### Fixed
 
-- `internal/update/update.go` اکنون از `strings.Repeat` استاندارد استفاده می‌کند
+- `internal/update/update.go` — `strings.Repeat`
 
 ## [0.1.0] — 2026-08-01
 
 ### Added
 
-- اولین انتشار عمومی
-- دستورات: `faman <cmd>`, `search`, `version`, `help`, `update`
-- پارسر Markdown با پشتیبانی از front matter
-- رندر رنگی و واکنش‌گرا
-- جستجوی ساده
-- صفحات اولیه راهنمای فارسی
-- تست‌ها و CI
-- مستندات پروژه
+- انتشار اولیه CLI، پارسر، رندر، جستجو، CI، صفحات پایه
