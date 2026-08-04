@@ -12,7 +12,7 @@
   <a href="https://github.com/erfankasraie/Faman/actions/workflows/ci.yml"><img src="https://github.com/erfankasraie/Faman/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
   <a href="https://github.com/erfankasraie/Faman/releases"><img src="https://img.shields.io/github/v/release/erfankasraie/Faman?label=release" alt="Release"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"/></a>
-  <img src="https://img.shields.io/badge/pages-176+-green" alt="pages"/>
+  <img src="https://img.shields.io/badge/pages-191+-green" alt="pages"/>
   <img src="https://img.shields.io/badge/version-0.2.2-blue" alt="version"/>
 </p>
 
@@ -71,7 +71,7 @@ faman version
 
 ## امکانات
 
-- ۱۷۶+ صفحه فارسی
+- ۱۹۱+ صفحه فارسی
 - `list` · `categories` · `random` · `doctor` · `update` (+ SHA256 verify)
 - completion نام صفحات · `search --cat`
 - tar.gz · zip · **`.deb`** · لینوکس / macOS / ویندوز
