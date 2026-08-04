@@ -17,8 +17,18 @@ keywords:
 # Syntax
 
 ```
-whois DOMAIN_OR_IP
+whois [OPTIONS] DOMAIN_OR_IP
 ```
+
+# Options
+
+| گزینه | توضیح |
+|-------|--------|
+| `DOMAIN_OR_IP` | دامنه یا آدرس برای استعلام |
+| `-h HOST` | سرور whois مشخص (در برخی پیاده‌سازی‌ها) |
+| `-p PORT` | پورت سرور whois |
+
+خروجی بین registryها فرق می‌کند؛ فیلدها استاندارد یکسان ندارند.
 
 # Examples
 

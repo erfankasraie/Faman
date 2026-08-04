@@ -22,6 +22,16 @@ keywords:
 nslookup [DOMAIN or IP] [DNS_SERVER]
 ```
 
+# Options
+
+| گزینه / حالت | توضیح |
+|----------------|--------|
+| `DOMAIN` | نام دامنه برای resolve |
+| `IP` | جستجوی معکوس |
+| `DNS_SERVER` | سرور DNS جایگزین (مثلاً `8.8.8.8`) |
+| `-type=TYPE` | نوع رکورد: `A`, `AAAA`, `MX`, `NS`, `TXT`, … |
+| حالت تعاملی | بدون آرگومان: prompt برای چند query |
+
 # Examples
 
 ```bash
