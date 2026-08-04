@@ -3,104 +3,84 @@
 ## سریع
 
 ```bash
-# نصب + تنظیم شل
-curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh \
-  | bash -s -- --user --with-rtl
-
-# فقط completion و zshrc (اگر faman نصب است)
-PREFIX=$HOME/.local USER_INSTALL=1 bash <(curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install-shell.sh)
-```
-
-یا از کلون:
-
-```bash
 PREFIX=$HOME/.local USER_INSTALL=1 bash scripts/install-shell.sh
-```
-
-بعد:
-
-```zsh
 exec zsh
 faman <TAB>
+faman-status        # اگر ماژول source شده باشد
 ```
 
 ---
 
-## بلوک آماده برای `~/.zshrc`
-
-این بلوک را **بالای** `source $ZSH/oh-my-zsh.sh` بگذارید (اگر Oh My Zsh دارید):
+## بلوک `~/.zshrc` (بالای Oh My Zsh)
 
 ```zsh
 # ── faman ──────────────────────────────────────────
 export PATH="$HOME/.local/bin:$PATH"
 export LANG="${LANG:-en_US.UTF-8}"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
-# export FAMAN_PLAIN=1        # اگر حروف خراب بود فعال کنید
-# export FAMAN_WRAP=0
+# export FAMAN_PLAIN=1
 
 fpath=($HOME/.zsh/completions $fpath)
 
-alias f='faman'
-alias fs='faman search'
-alias fp='FAMAN_PLAIN=1 faman'
+[[ -f $HOME/.config/faman/faman.zsh ]] && source $HOME/.config/faman/faman.zsh
+# [[ -f $HOME/.config/faman/faman-fzf.zsh ]] && source $HOME/.config/faman/faman-fzf.zsh
 # ───────────────────────────────────────────────────
 ```
 
-بدون Oh My Zsh، بعد از `fpath`:
+بدون OMZ بعد از `fpath`:
 
 ```zsh
 autoload -Uz compinit && compinit
 ```
 
-### تولید completion
+### تولید / تازه‌سازی completion
 
 ```zsh
 mkdir -p ~/.zsh/completions
 faman completion zsh > ~/.zsh/completions/_faman
-rm -f ~/.zcompdump*
-compinit
+# یا:
+faman-recomplete
 ```
+
+جزئیات خطاها: [completion.md](completion.md)
 
 ---
 
-## Oh My Zsh
+## Aliasها و ابزارهای جدید (ماژول `faman.zsh`)
 
-1. `fpath` و بلوک faman **قبل از** `source $ZSH/oh-my-zsh.sh`
-2. نیازی به `compinit` دستی نیست
-3. `exec zsh` بعد از تغییر
+| میانبر | معادل |
+|--------|--------|
+| `f` | `faman` |
+| `fs` | `faman search` |
+| `fl` | `faman list` |
+| `fcats` | `faman categories` |
+| `frand` | `faman random` |
+| `fdoc` | `faman doctor` |
+| `fup` / `fupp` / `fupv` | `update` / `--pages` / `--pages --verify` |
+| `fp` | `FAMAN_PLAIN=1 faman` |
+| `ff` | انتخاب صفحه با fzf |
+| `fm name` | show یا search |
+| `fls` | لیست نام صفحات |
+| `faman-recomplete` | بازتولید Tab completion |
+| `faman-status` | تشخیص محیط |
 
-## Prezto / Antigen / Zinit
+کلیدها: `Alt-f` → fzf · `Alt-m` → man برای آخرین فرمان history
 
-همان منطق: مسیر `~/.zsh/completions` باید در `fpath` باشد **قبل از** initialize شدن سیستم completion.
+---
 
-مثال Zinit:
+## Oh My Zsh / Prezto / Zinit
+
+همان قانون: **`fpath` و source ماژول قبل از initialize completion framework.**
+
+بعد از ارتقای باینری همیشه:
 
 ```zsh
-fpath=($HOME/.zsh/completions $fpath)
-# ... zinit load ...
+faman-recomplete
 ```
 
 ---
 
-## متغیرهای محیطی مفید
+## مرتبط
 
-| متغیر | معنی |
-|--------|------|
-| `FAMAN_PLAIN=1` | خروجی ساده، بدون wrap تهاجمی |
-| `FAMAN_WRAP=0` | بدون شکستن خط |
-| `FAMAN_PAGES` | مسیر سفارشی صفحات |
-| `LANG` / `LC_ALL` | باید UTF-8 باشد |
-
----
-
-## عیب‌یابی
-
-| مشکل | کار |
-|------|-----|
-| `faman: command not found` | `export PATH="$HOME/.local/bin:$PATH"` |
-| TAB چیزی نشان نمی‌دهد | `_faman` + `fpath` + `compinit` |
-| completion قدیمی | دوباره `faman completion zsh > ~/.zsh/completions/_faman` و `rm ~/.zcompdump*` |
-| فارسی خراب | فونت ترمینال + UTF-8 + `FAMAN_PLAIN=1` |
-
-مستندات نصب: [install.md](install.md)  
-ترمینال فارسی: [terminal-persian.md](terminal-persian.md)
+- [completion.md](completion.md) — عیب‌یابی Tab
+- [fzf.md](fzf.md) · [bat-preview.md](bat-preview.md) · [zsh-advanced.md](zsh-advanced.md)

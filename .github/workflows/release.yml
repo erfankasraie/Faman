@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (must be NEW if previous was immutable, e.g. v0.2.1)'
+        description: 'Tag to release (NEW tag if previous was immutable, e.g. v0.2.2)'
         required: true
-        default: 'v0.2.1'
+        default: 'v0.2.2'
       prerelease:
         description: 'Mark as pre-release'
         type: boolean
@@ -63,20 +63,17 @@ jobs:
             echo "No existing release for $TAG"
             exit 0
           fi
-
           META=$(gh release view "$TAG" --json isDraft,isImmutable,url,assets \
             --jq '{isDraft, isImmutable, url, n: (.assets|length)}')
           echo "$META"
           IS_DRAFT=$(echo "$META" | jq -r .isDraft)
           N=$(echo "$META" | jq -r .n)
-
           if [ "$IS_DRAFT" = "true" ]; then
             echo "Draft release found — deleting draft only"
             gh release delete "$TAG" -y
             echo "exists=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
           if [ "$N" -gt 0 ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "skip_build=true" >> "$GITHUB_OUTPUT"
@@ -85,10 +82,7 @@ jobs:
               --jq '{url, isDraft, isPrerelease, assets: [.assets[].name]}'
             exit 0
           fi
-
-          # Published immutable release without assets — cannot re-attach
-          echo "::error::Tag $TAG was already used by an immutable release without usable assets."
-          echo "::error::GitHub forbids reusing that tag_name. Bump the version (e.g. v0.2.1) and run again."
+          echo "::error::Tag $TAG was used by an immutable release without usable assets. Bump version."
           exit 1
 
       - name: Build binaries
@@ -137,8 +131,48 @@ jobs:
           cp docs/windows.md "dist/pkg/$dir/" 2>/dev/null || true
           (cd dist/pkg && zip -qr "../${dir}.zip" "$dir")
 
-          (cd dist && sha256sum faman-*.tar.gz faman-*.zip > SHA256SUMS)
-          ls -lh dist/faman-*.tar.gz dist/faman-*.zip dist/SHA256SUMS
+          ls -lh dist/faman-*.tar.gz dist/faman-*.zip
+
+      - name: Build .deb (amd64)
+        if: steps.existing.outputs.skip_build != 'true'
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          # Ubuntu runner has dpkg-deb
+          debroot="dist/deb-root"
+          rm -rf "$debroot"
+          mkdir -p "$debroot/usr/local/bin" \
+                   "$debroot/usr/local/share/faman" \
+                   "$debroot/usr/share/bash-completion/completions" \
+                   "$debroot/DEBIAN"
+          cp dist/faman-linux-amd64 "$debroot/usr/local/bin/faman"
+          chmod 755 "$debroot/usr/local/bin/faman"
+          cp -a pages "$debroot/usr/local/share/faman/"
+          # bash completion (static generation from built binary)
+          ./dist/faman-linux-amd64 completion bash > "$debroot/usr/share/bash-completion/completions/faman" || true
+          debver="${VERSION//-pre/~pre}"
+          cat > "$debroot/DEBIAN/control" <<EOF
+          Package: faman
+          Version: ${debver}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Erfan Kasraie <erfankasraiee@gmail.com>
+          Description: Persian manual pages for Linux commands
+           faman teaches common Linux commands in Persian from the terminal.
+           Includes pages under /usr/local/share/faman/pages/fa.
+          EOF
+          # strip leading spaces from control (heredoc indent)
+          sed -i 's/^          //' "$debroot/DEBIAN/control"
+          dpkg-deb --build "$debroot" "dist/faman_${VERSION}_amd64.deb"
+          ls -lh "dist/faman_${VERSION}_amd64.deb"
+
+      - name: SHA256SUMS
+        if: steps.existing.outputs.skip_build != 'true'
+        run: |
+          (cd dist && sha256sum faman-*.tar.gz faman-*.zip faman_*.deb > SHA256SUMS)
+          cat dist/SHA256SUMS
 
       - name: Write release notes
         if: steps.existing.outputs.skip_build != 'true'
@@ -155,31 +189,29 @@ jobs:
           |---------|----------|
           | \`faman-${VERSION}-linux-amd64.tar.gz\` | Linux x86_64 |
           | \`faman-${VERSION}-linux-arm64.tar.gz\` | Linux ARM64 |
+          | \`faman_${VERSION}_amd64.deb\` | Debian/Ubuntu (amd64) |
           | \`faman-${VERSION}-windows-amd64.zip\` | Windows x64 |
           | \`faman-${VERSION}-darwin-amd64.tar.gz\` | macOS Intel |
           | \`faman-${VERSION}-darwin-arm64.tar.gz\` | macOS Apple Silicon |
 
-          ### Linux
+          ### Debian / Ubuntu
+          \`\`\`bash
+          sudo dpkg -i faman_${VERSION}_amd64.deb
+          faman version
+          faman ls
+          \`\`\`
+
+          ### Linux (tar)
           \`\`\`bash
           tar -xzf faman-${VERSION}-linux-amd64.tar.gz
           cd faman-${VERSION}-linux-amd64
           export FAMAN_PAGES="\$PWD/pages/fa"
           ./faman version
-          ./faman ls
-          \`\`\`
-
-          ### Windows
-          \`\`\`powershell
-          Expand-Archive faman-${VERSION}-windows-amd64.zip
-          cd faman-${VERSION}-windows-amd64
-          \$env:FAMAN_PAGES = "\$PWD\\pages\\fa"
-          .\\faman.exe version
-          .\\faman.exe ls
           \`\`\`
 
           Verify: \`sha256sum -c SHA256SUMS --ignore-missing\`
 
-          Docs: [windows.md](https://github.com/erfankasraie/Faman/blob/main/docs/windows.md) · [packaging.md](https://github.com/erfankasraie/Faman/blob/main/docs/packaging.md)
+          Docs: [packaging.md](https://github.com/erfankasraie/Faman/blob/main/docs/packaging.md) · [zsh.md](https://github.com/erfankasraie/Faman/blob/main/docs/zsh.md)
           EOF
 
       - name: Create draft release with all assets
@@ -194,16 +226,11 @@ jobs:
           if [ "$PRERELEASE" = "true" ]; then
             EXTRA+=(--prerelease)
           fi
-
-          # Tag must already exist on the remote for immutable / restricted repos.
-          # Prefer: git tag + git push origin vX.Y.Z from your machine, then run workflow.
           if ! git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
-            echo "::error::Git tag $TAG does not exist on origin."
-            echo "::error::Create it locally and push, then re-run:"
+            echo "::error::Git tag $TAG does not exist on origin. Push the tag first:"
             echo "::error::  git tag -a $TAG -m 'faman $TAG' && git push origin $TAG"
             exit 1
           fi
-
           gh release create "$TAG" \
             --title "faman $TAG" \
             --notes-file dist/RELEASE_NOTES.md \
@@ -212,6 +239,7 @@ jobs:
             "${EXTRA[@]}" \
             dist/faman-*.tar.gz \
             dist/faman-*.zip \
+            dist/faman_*.deb \
             dist/SHA256SUMS
 
       - name: Publish release
