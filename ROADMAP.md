@@ -12,123 +12,71 @@
 |------|--------|
 | صفحات `pages/fa` | ~۱۳۵ |
 | CLI | show · search · version · help · update · completion |
-| `faman update` | `--check` + `--pages` (باینری جدا) |
-| نصب | `get.sh` · `install.sh` · `install.ps1` |
-| بسته‌بندی | `package.sh` → tar.gz / zip.exe / deb محلی |
-| مستندات پلتفرم | linux-distros · macos · windows · packaging · update |
-| عمق man (انجام‌شده) | find · grep · sed · awk · tar · rsync · curl · **ssh · git · docker · systemctl · journalctl · chmod** |
-| CI | GitHub Actions + golangci-lint |
-
-**درصد تقریبی مسیر محتوا تا v1.0:** ~۵۰–۵۵٪ تعداد · عمق در حال تکمیل فاز ۱.
+| `faman update` | `--check` + `--pages` |
+| نصب / بسته‌بندی | get.sh · install · package.sh · docs پلتفرم |
+| عمق man | دستهٔ ۱ + **کل دستهٔ ۲ (فاز ۱ تمام)** |
+| CI | Actions + golangci-lint |
 
 ---
 
 ## ۲. اصول اولویت
 
-1. **عمق man سنگین > تعداد صفحهٔ خام**
-2. قالب آموزشی ۷ بخشی حفظ شود (نه کپی man)
-3. نصب کاربر جدید < ۲ دقیقه
-4. صفحات با `update --pages` از باینری جدا بمانند
-5. هر فاز خروجی قابل‌تست داشته باشد (چک‌باکس + معیار پذیرش)
-
-### سیاست عمق
-
-| نوع دستور | حداقل انتظار |
-|-----------|----------------|
-| کوتاه (`true`, `yes`) | مقدمه + مثال |
-| متوسط | ۷ بخش کامل، ≥۳ مثال |
-| سنگین (`ssh`, `git`, `find`, …) | جداول گزینهٔ گسترده + ≥۴ سناریو + اشتباهات |
+1. عمق man سنگین > تعداد خام  
+2. قالب ۷ بخشی آموزشی  
+3. نصب < ۲ دقیقه  
+4. صفحات جدا با `update --pages`  
+5. هر فاز معیار پذیرش دارد  
 
 ---
 
 ## ۳. فازها
 
-### فاز ۰ — بستن پیش‌انتشار `v0.1.4-pre`  ·  وضعیت: تقریباً تمام
+### فاز ۰ — `v0.1.4-pre` · تقریباً تمام
 
-| # | کار | پذیرش | وضعیت |
-|---|-----|--------|--------|
-| 0.1 | نسخه در کد = 0.1.4-pre | `faman version` | [x] |
-| 0.2 | CHANGELOG / README / install / update docs | لینک‌های README درست | [x] |
-| 0.3 | update واقعی | `--check` و `--pages` کار کنند | [x] |
-| 0.4 | packaging script + docs مک/لینوکس | `docs/macos.md` و `linux-distros.md` | [x] |
-| 0.5 | تگ GitHub + آرتیفکت Release | فایل linux/darwin/windows روی Releases | [ ] maintainer |
-| 0.6 | CI سبز روی main | Actions success | [x] |
-
-**خروجی:** Pre-release عمومی قابل لینک‌دادن.
-
----
-
-### فاز ۱ — عمق man دستهٔ دوم  ·  **← الان اینجا**  ·  ۳–۷ روز
-
-هدف: همان سطح `find`/`curl` برای دستورات پربازدید باقی‌مانده.
-
-| # | صفحه | تمرکز محتوا | وضعیت |
-|---|------|-------------|--------|
-| 1.1 | `ssh` | کلید، config، تونل، ProxyJump | [x] |
-| 1.2 | `scp` | مسیر remote، `-r` | [ ] بعدی |
-| 1.3 | `git` | clone/commit/branch/remote/log | [x] |
-| 1.4 | `docker` | run/build/ps/images/compose | [x] |
-| 1.5 | `systemctl` | start/enable/status/unit | [x] |
-| 1.6 | `journalctl` | unit/time/follow | [x] |
-| 1.7 | `chmod` | نمادین و عددی، `-R`، ACL اشاره | [x] |
-| 1.8 | `ip` | addr/link/route/neigh | [ ] بعدی |
-| 1.9 | `tmux` | session/window/pane | [ ] بعدی |
-| 1.10 | `jq` | filter پایه | [ ] بعدی |
-| 1.11 | `make` | target، `-j` | [ ] بعدی |
-| 1.12 | `crontab` | فرمت زمان | [ ] بعدی |
-
-**معیار پذیرش فاز ۱:** هر صفحه جداول+مثال عملی؛ `faman ssh` سناریوی واقعی بدهد.
-
-**پیشرفت:** ۶ از ۱۲ انجام شد.
-
----
-
-### فاز ۲ — کیفیت صفحات و ابزار ممیزی  ·  ۳–۵ روز
-
-| # | کار | جزئیات |
+| # | کار | وضعیت |
 |---|-----|--------|
-| 2.1 | `scripts/check-pages.sh` | front matter، ۷ بخش، حداقل بایت |
-| 2.2 | check در CI | fail روی صفحهٔ ناقص |
-| 2.3 | یکنواختی aliases/keywords | جستجوی بهتر |
-| 2.4 | ممیزی صفحات کم‌حجم | غنی‌سازی |
+| 0.1–0.4, 0.6 | نسخه، docs، update، packaging، CI | [x] |
+| 0.5 | تگ + آرتیفکت GitHub Releases | [ ] maintainer |
 
----
+### فاز ۱ — عمق man دستهٔ دوم · **[x] تمام**
 
-### فاز ۳ — CLI محصولی `v0.2.0`  ·  ۲–۴ هفته
+| # | صفحه | وضعیت |
+|---|------|--------|
+| 1.1 | `ssh` | [x] |
+| 1.2 | `scp` | [x] |
+| 1.3 | `git` | [x] |
+| 1.4 | `docker` | [x] |
+| 1.5 | `systemctl` | [x] |
+| 1.6 | `journalctl` | [x] |
+| 1.7 | `chmod` | [x] |
+| 1.8 | `ip` | [x] |
+| 1.9 | `tmux` | [x] |
+| 1.10 | `jq` | [x] |
+| 1.11 | `make` | [x] |
+| 1.12 | `crontab` | [x] |
 
-| # | قابلیت | جزئیات |
-|---|--------|--------|
-| 3.1 | `faman list` | `--cat`، `--diff` |
-| 3.2 | `faman categories` | شمارش |
-| 3.3 | `faman random` | یادگیری |
-| 3.4 | `faman doctor` | locale، pages path |
-| 3.5 | search `--cat` | فیلتر |
-| 3.6 | completion نام صفحات | arg اول |
-| 3.7 | ≥ ۱۵۰ صفحه | |
+به‌علاوه از قبل: find · grep · sed · awk · tar · rsync · curl
 
----
+### فاز ۲ — کیفیت و ممیزی · **← بعدی**
 
-### فاز ۴ — صفحات کمبود (موازی)
+| # | کار |
+|---|-----|
+| 2.1 | `scripts/check-pages.sh` |
+| 2.2 | اتصال به CI |
+| 2.3 | یکنواختی aliases/keywords |
+| 2.4 | ممیزی صفحات کم‌حجم |
 
-`dd`, `fdisk`, `mkfs`, `htop`, `strace`, `ssh-keygen`, `xz`, `zstd`, `setfacl`, `nmap` پایه، …
+### فاز ۳ — CLI `v0.2.0`
 
----
+`list` · `categories` · `random` · `doctor` · search `--cat` · completion · ≥۱۵۰ صفحه
 
-### فاز ۵ — توزیع `v0.3.0`
+### فاز ۴ — صفحات کمبود
 
-deb در Release · nFPM/rpm · update باینری · SHA256 · AUR/Homebrew اسکلت
+dd · fdisk · htop · strace · ssh-keygen · xz · zstd · setfacl · nmap پایه · …
 
----
+### فاز ۵–۷
 
-### فاز ۶ — TUI `v0.4.0`
-
-بعد از فاز ۲ · bubbletea
-
----
-
-### فاز ۷ — v1.0
-
-≥۲۰۰ صفحه · schema قفل · semver پایدار
+توزیع deb/rpm · TUI · v1.0 (≥۲۰۰ صفحه)
 
 ---
 
@@ -136,22 +84,13 @@ deb در Release · nFPM/rpm · update باینری · SHA256 · AUR/Homebrew ا
 
 | هفته | تمرکز |
 |------|--------|
-| **جاری** | فاز ۱: اتمام scp · ip · tmux · jq · make · crontab |
-| +۱ | فاز ۲ check-pages + CI |
-| +۲ | list / categories / doctor |
-| +۳ | +۲۰ صفحه · v0.2.0 |
-| +۴ | deb در CI |
+| **بعدی** | فاز ۲: check-pages.sh + CI |
+| +۱ | list / doctor / categories |
+| +۲ | +۲۰ صفحه · آماده‌سازی v0.2.0 |
+| +۳ | deb در Release |
 
 ---
 
-## ۵. تصمیم‌های باز
+## ۵. خارج از محدوده
 
-1. `go:embed` برای pages؟
-2. `faman list` در برابر `faman pages`
-3. git تک‌صفحه در برابر زیرصفحات
-
----
-
-## ۶. خارج از محدوده
-
-AI داخل باینری · RTL کامل همه ترمینال‌ها · i18n زودهنگام
+AI داخل باینری · RTL کامل همه‌جا · i18n زودهنگام
