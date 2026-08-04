@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (e.g. v0.2.0)'
+        description: 'Tag to release (must be NEW if previous was immutable, e.g. v0.2.1)'
         required: true
-        default: 'v0.2.0'
+        default: 'v0.2.1'
       prerelease:
         description: 'Mark as pre-release'
         type: boolean
@@ -51,7 +51,48 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check existing release (immutable-safe)
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No existing release for $TAG"
+            exit 0
+          fi
+
+          META=$(gh release view "$TAG" --json isDraft,isImmutable,url,assets \
+            --jq '{isDraft, isImmutable, url, n: (.assets|length)}')
+          echo "$META"
+          IS_DRAFT=$(echo "$META" | jq -r .isDraft)
+          N=$(echo "$META" | jq -r .n)
+
+          if [ "$IS_DRAFT" = "true" ]; then
+            echo "Draft release found — deleting draft only"
+            gh release delete "$TAG" -y
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$N" -gt 0 ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "skip_build=true" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG already published with $N assets (immutable). Skipping rebuild."
+            gh release view "$TAG" --json url,isDraft,isPrerelease,assets \
+              --jq '{url, isDraft, isPrerelease, assets: [.assets[].name]}'
+            exit 0
+          fi
+
+          # Published immutable release without assets — cannot re-attach
+          echo "::error::Tag $TAG was already used by an immutable release without usable assets."
+          echo "::error::GitHub forbids reusing that tag_name. Bump the version (e.g. v0.2.1) and run again."
+          exit 1
+
       - name: Build binaries
+        if: steps.existing.outputs.skip_build != 'true'
         env:
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
@@ -69,6 +110,7 @@ jobs:
           build darwin arm64 faman-darwin-arm64
 
       - name: Package archives
+        if: steps.existing.outputs.skip_build != 'true'
         env:
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
@@ -99,6 +141,7 @@ jobs:
           ls -lh dist/faman-*.tar.gz dist/faman-*.zip dist/SHA256SUMS
 
       - name: Write release notes
+        if: steps.existing.outputs.skip_build != 'true'
         env:
           TAG: ${{ steps.ver.outputs.tag }}
           VERSION: ${{ steps.ver.outputs.version }}
@@ -134,30 +177,32 @@ jobs:
           .\\faman.exe ls
           \`\`\`
 
+          Verify: \`sha256sum -c SHA256SUMS --ignore-missing\`
+
           Docs: [windows.md](https://github.com/erfankasraie/Faman/blob/main/docs/windows.md) · [packaging.md](https://github.com/erfankasraie/Faman/blob/main/docs/packaging.md)
           EOF
 
-      - name: Create draft release with assets
+      - name: Create draft release with all assets
+        if: steps.existing.outputs.skip_build != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.ver.outputs.tag }}
           PRERELEASE: ${{ steps.ver.outputs.prerelease }}
         run: |
           set -euo pipefail
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Existing release $TAG found — deleting so assets can be re-attached"
-            gh release delete "$TAG" -y || true
-          fi
-
           EXTRA=()
           if [ "$PRERELEASE" = "true" ]; then
             EXTRA+=(--prerelease)
           fi
 
-          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
-            git tag "$TAG" || true
+          # Tag must already exist on the remote for immutable / restricted repos.
+          # Prefer: git tag + git push origin vX.Y.Z from your machine, then run workflow.
+          if ! git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
+            echo "::error::Git tag $TAG does not exist on origin."
+            echo "::error::Create it locally and push, then re-run:"
+            echo "::error::  git tag -a $TAG -m 'faman $TAG' && git push origin $TAG"
+            exit 1
           fi
-          git push origin "refs/tags/$TAG" 2>/dev/null || true
 
           gh release create "$TAG" \
             --title "faman $TAG" \
@@ -170,6 +215,7 @@ jobs:
             dist/SHA256SUMS
 
       - name: Publish release
+        if: steps.existing.outputs.skip_build != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.ver.outputs.tag }}
@@ -181,6 +227,5 @@ jobs:
           else
             gh release edit "$TAG" --draft=false --latest
           fi
-          # Field name is "assets" (not releaseAssets) on current gh CLI
           gh release view "$TAG" --json isDraft,isPrerelease,url,assets \
             --jq '{url, isDraft, isPrerelease, assets: [.assets[].name]}'
