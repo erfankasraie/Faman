@@ -6,14 +6,34 @@ import (
 	"github.com/faman-project/faman/internal/update"
 )
 
+var (
+	updateCheckOnly bool
+	updatePagesOnly bool
+	updateForce     bool
+)
+
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "به‌روزرسانی صفحات راهنما (در حال حاضر غیرفعال)",
-	Long: `به‌روزرسانی صفحات راهنما از مخزن آنلاین.
+	Short: "بررسی نسخه و به‌روزرسانی صفحات راهنما",
+	Long: `بررسی آخرین انتشار روی GitHub و (اختیاری) تازه‌سازی صفحات فارسی.
 
-در نسخه فعلی این دستور فقط یک placeholder است.
-در نسخه‌های آینده امکان به‌روزرسانی آنلاین اضافه خواهد شد.`,
+  faman update           # وضعیت نسخه + راهنمای بعدی
+  faman update --check   # فقط مقایسه نسخه
+  faman update --pages   # دانلود pages/fa از شاخه main
+
+باینری را این دستور عوض نمی‌کند؛ برای باینری دوباره get.sh / release را اجرا کنید.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return update.Run()
+		return update.Run(update.Options{
+			CurrentVersion: Version(),
+			CheckOnly:      updateCheckOnly,
+			PagesOnly:      updatePagesOnly,
+			Force:          updateForce,
+		})
 	},
+}
+
+func init() {
+	updateCmd.Flags().BoolVar(&updateCheckOnly, "check", false, "فقط بررسی نسخه روی GitHub")
+	updateCmd.Flags().BoolVar(&updatePagesOnly, "pages", false, "دانلود و نصب صفحات از main")
+	updateCmd.Flags().BoolVar(&updateForce, "force", false, "بازنویسی صفحات حتی اگر مسیر سیستم باشد")
 }
