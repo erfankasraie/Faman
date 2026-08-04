@@ -1,36 +1,31 @@
 # Changelog
 
-## [0.2.0] — 2026-08-04
-
-اولین انتشار **پایدار** (بدون pre-release).
+## [0.2.2] — 2026-08-05 (planned release)
 
 ### Added
-- CLI: `faman list` (`--cat`, `--diff`, `--names`)
-- CLI: `faman categories`
-- CLI: `faman random` (`--open`)
-- CLI: `faman doctor`
-- `faman update --check` / `--pages`
-- `scripts/check-pages.sh` + گام CI
-- `scripts/package.sh` (tar.gz / zip.exe / deb)
-- مستندات macOS، linux-distros، packaging، update
-- عمق man برای دستورات سنگین (find…curl و ssh…crontab)
-- پوشش گسترده pages (~۱۶۳ صفحه) شامل مدیران بسته و محیط مجازی
+- `search --cat` و completion نام صفحات / دسته‌ها
+- `.deb` (amd64) در workflow ریلیز + bash completion داخل پکیج
+- `faman update --pages --verify` با تأیید SHA256SUMS از Release
+- صفحات جدید: xz · zstd · more · whereis · tree · ncdu · timeout · blkid · fdisk · parted · sftp · host · mtr
+- ماژول zsh: aliasهای list/doctor/update، `faman-recomplete`، تشخیص completion
+- مستندات: docs/completion.md، به‌روزرسانی zsh.md و update.md
 
-### Platform
-- لینوکس · macOS · ویندوز (مسیر pages، install.ps1)
+### Fixed
+- workflow ریلیز سازگار با immutable releases
+- فیلد JSON `assets` در تأیید ریلیز
+
+## [0.2.1] — 2026-08-04
+
+ریلیز پایدار پس از محدودیت immutable روی v0.2.0؛ آرتیفکت کامل + SHA256SUMS.
+
+## [0.2.0] — 2026-08-04
+
+اولین انتشار پایدار: list · categories · random · doctor · update · ~۱۶۳ صفحه.
 
 ## [0.1.4-pre] — 2026-08-04
 
-پیش‌نمایش: update، packaging، docs، عمق man اولیه.
-
-## [0.1.3-pre] — 2026-08
-
-تگ/پیش‌انتشار میانی.
-
-## [0.1.2-pre] — 2026-08-02
-
-ویندوز، لوگو مرکزی، zsh/fzf، installer RTL، CI lint fixes.
+پیش‌نمایش: packaging، docs، عمق man.
 
 ## [0.1.0] — earlier
 
-CLI اولیه، parser، renderer، search.
+CLI اولیه.

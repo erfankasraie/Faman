@@ -13,7 +13,7 @@ import (
 
 var (
 	// version is set at link time: -X github.com/faman-project/faman/internal/app.version=...
-	version = "0.2.1"
+	version = "0.2.2"
 	rootCmd = &cobra.Command{
 		Use:   "faman",
 		Short: "صفحات راهنمای فارسی لینوکس — Persian Manual Pages",
@@ -24,8 +24,8 @@ faman یک ابزار خط فرمان است که دستورات لینوکس ر
 
 مثال‌ها:
   faman ls
-  faman search docker
-  faman list --cat network
+  faman search docker --cat network
+  faman list --cat filesystem
   faman doctor
   faman update --pages --verify
   faman version`,

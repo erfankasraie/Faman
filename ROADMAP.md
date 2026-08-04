@@ -1,7 +1,6 @@
 # Roadmap — faman
 
-آخرین به‌روزرسانی: **۲۰۲۶-۰۸-۰۴**  
-نسخهٔ پایدار: **`0.2.0`**
+نسخهٔ در حال آماده‌سازی: **`0.2.2`** (ریلیز برنامه‌ریزی‌شده: فردا)
 
 ---
 
@@ -9,32 +8,30 @@
 
 | محور | مقدار |
 |------|--------|
-| صفحات | ~۱۶۳ |
-| CLI | show · search · list · categories · random · doctor · update |
-| انتشار | **v0.2.0 stable** (بدون pre) |
-| check-pages | در CI |
+| صفحات | ~۱۷۶ (پس از batch 0.2.2) |
+| CLI | show · search(--cat) · list · categories · random · doctor · update(--verify) · completion |
+| بسته‌ها | tar.gz · zip · **deb** · SHA256SUMS |
+| zsh | alias + recomplete + docs |
 
 ---
 
-## انجام‌شده تا v0.2.0
+## چک‌لیست ریلیز v0.2.2 (فردا)
 
-- [x] فاز ۱ عمق man
-- [x] فاز ۲ check-pages + CI
-- [x] فاز ۳: list / categories / random / doctor
-- [x] نسخه 0.2.0 در کد + CHANGELOG
-
-## بعدی (پس از v0.2.0)
-
-| # | کار |
-|---|-----|
-| 1 | completion نام صفحات |
-| 2 | `search --cat` |
-| 3 | deb روی Release workflow |
-| 4 | صفحات کمبود بیشتر |
-| 5 | v0.3.0 توزیع |
+- [x] version = 0.2.2 در کد
+- [x] CHANGELOG بخش 0.2.2
+- [x] deb در workflow
+- [x] search --cat + completion
+- [x] صفحات کمبود دسته فشرده‌سازی / دیسک / شبکه
+- [ ] `bash scripts/check-pages.sh` سبز
+- [ ] CI سبز روی main
+- [ ] `git tag -a v0.2.2 -m "faman v0.2.2" && git push origin v0.2.2`
+- [ ] تأیید Assets شامل `.deb` و `SHA256SUMS`
 
 ---
 
-## خارج از محدوده فعلاً
+## بعد از 0.2.2
 
-AI داخل باینری · TUI قبل از قفل فرمت · i18n
+1. پوشش بیشتر pages (~۲۰۰)
+2. deb arm64 اختیاری
+3. self-update باینری اختیاری با verify
+4. v0.3.0
