@@ -5,36 +5,125 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
-	"time"
 )
 
-func downloadPagesTo(dest string) error {
-	client := &http.Client{Timeout: 120 * time.Second}
-	req, err := http.NewRequest(http.MethodGet, archiveURL, nil)
+// downloadPagesFromMain downloads GitHub main branch archive, prints SHA256, extracts pages/fa.
+func downloadPagesFromMain(dest string) (sha string, err error) {
+	tmpFile, err := os.CreateTemp("", "faman-main-*.tar.gz")
 	if err != nil {
-		return err
+		return "", err
 	}
-	req.Header.Set("User-Agent", "faman-update")
-	resp, err := client.Do(req)
+	path := tmpFile.Name()
+	_ = tmpFile.Close()
+	defer os.Remove(path)
+
+	if err := downloadToFile(archiveURL, path); err != nil {
+		return "", err
+	}
+	sha, err = fileSHA256(path)
 	if err != nil {
-		return err
+		return "", err
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("download failed: HTTP %d", resp.StatusCode)
+	if err := extractPagesFaFromTarGz(path, dest); err != nil {
+		return sha, err
+	}
+	return sha, nil
+}
+
+// downloadPagesFromRelease downloads platform archive from latest GitHub Release,
+// verifies SHA256 against release SHA256SUMS, extracts pages/fa.
+func downloadPagesFromRelease(dest string) (tag, archiveName, sha string, err error) {
+	tag, _, err = latestRemoteVersion()
+	if err != nil {
+		return "", "", "", err
+	}
+	tag = strings.TrimSpace(tag)
+	ver := strings.TrimPrefix(tag, "v")
+
+	archiveName = releaseArchiveName(ver)
+	base := fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/", repoOwner, repoName, tag)
+	sumsURL := base + "SHA256SUMS"
+	archURL := base + archiveName
+
+	tmpDir, err := os.MkdirTemp("", "faman-rel-*")
+	if err != nil {
+		return tag, archiveName, "", err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	sumsPath := filepath.Join(tmpDir, "SHA256SUMS")
+	archPath := filepath.Join(tmpDir, archiveName)
+	if err := downloadToFile(sumsURL, sumsPath); err != nil {
+		return tag, archiveName, "", fmt.Errorf("SHA256SUMS: %w (آیا Release آرتیفکت دارد؟)", err)
+	}
+	if err := downloadToFile(archURL, archPath); err != nil {
+		return tag, archiveName, "", fmt.Errorf("archive: %w", err)
 	}
 
-	gz, err := gzip.NewReader(resp.Body)
+	f, err := os.Open(sumsPath)
+	if err != nil {
+		return tag, archiveName, "", err
+	}
+	sums, err := parseSHA256SUMS(f)
+	_ = f.Close()
+	if err != nil {
+		return tag, archiveName, "", err
+	}
+	if err := verifyFileAgainstSUMS(archPath, sums); err != nil {
+		return tag, archiveName, "", err
+	}
+	sha, err = fileSHA256(archPath)
+	if err != nil {
+		return tag, archiveName, "", err
+	}
+
+	switch {
+	case strings.HasSuffix(archiveName, ".tar.gz"):
+		err = extractPagesFaFromTarGz(archPath, dest)
+	case strings.HasSuffix(archiveName, ".zip"):
+		err = extractPagesFaFromZip(archPath, dest)
+	default:
+		err = fmt.Errorf("unknown archive type: %s", archiveName)
+	}
+	return tag, archiveName, sha, err
+}
+
+func releaseArchiveName(version string) string {
+	switch runtime.GOOS {
+	case "windows":
+		return fmt.Sprintf("faman-%s-windows-amd64.zip", version)
+	case "darwin":
+		if runtime.GOARCH == "arm64" {
+			return fmt.Sprintf("faman-%s-darwin-arm64.tar.gz", version)
+		}
+		return fmt.Sprintf("faman-%s-darwin-amd64.tar.gz", version)
+	default: // linux and others
+		if runtime.GOARCH == "arm64" {
+			return fmt.Sprintf("faman-%s-linux-arm64.tar.gz", version)
+		}
+		return fmt.Sprintf("faman-%s-linux-amd64.tar.gz", version)
+	}
+}
+
+func extractPagesFaFromTarGz(archivePath, dest string) error {
+	f, err := os.Open(archivePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	gz, err := gzip.NewReader(f)
 	if err != nil {
 		return err
 	}
 	defer gz.Close()
+	return extractPagesFaFromTar(tar.NewReader(gz), dest)
+}
 
-	tr := tar.NewReader(gz)
+func extractPagesFaFromTar(tr *tar.Reader, dest string) error {
 	tmp, err := os.MkdirTemp("", "faman-pages-*")
 	if err != nil {
 		return err
@@ -52,13 +141,11 @@ func downloadPagesTo(dest string) error {
 		name := filepath.ToSlash(hdr.Name)
 		idx := strings.Index(name, "/pages/fa/")
 		if idx < 0 {
+			// release layout: faman-VERSION-os/pages/fa/...
 			continue
 		}
 		rel := name[idx+len("/pages/fa/"):]
-		if rel == "" || strings.HasSuffix(name, "/pages/fa") {
-			continue
-		}
-		if strings.Contains(rel, "..") {
+		if rel == "" || strings.Contains(rel, "..") {
 			continue
 		}
 		target := filepath.Join(tmp, filepath.FromSlash(rel))
@@ -71,18 +158,17 @@ func downloadPagesTo(dest string) error {
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return err
 			}
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
+			out, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 			if err != nil {
 				return err
 			}
-			if _, err := io.Copy(f, tr); err != nil {
-				_ = f.Close()
+			if _, err := io.Copy(out, tr); err != nil {
+				_ = out.Close()
 				return err
 			}
-			_ = f.Close()
+			_ = out.Close()
 		}
 	}
-
 	entries, err := os.ReadDir(tmp)
 	if err != nil {
 		return err
@@ -90,7 +176,6 @@ func downloadPagesTo(dest string) error {
 	if len(entries) == 0 {
 		return fmt.Errorf("no pages/fa found in archive")
 	}
-
 	if err := os.MkdirAll(dest, 0o755); err != nil {
 		return err
 	}

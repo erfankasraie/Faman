@@ -27,6 +27,7 @@ type Options struct {
 	CheckOnly      bool
 	PagesOnly      bool
 	Force          bool
+	Verify         bool // with --pages: use Release archive + SHA256SUMS
 }
 
 // Run executes the update command.
@@ -35,7 +36,7 @@ func Run(opt Options) error {
 	printTitle(useColor)
 
 	if opt.PagesOnly {
-		return refreshPages(opt.Force, useColor)
+		return refreshPages(opt, useColor)
 	}
 
 	remote, src, err := latestRemoteVersion()
@@ -57,7 +58,7 @@ func Run(opt Options) error {
 
 	switch compareVersions(cur, rem) {
 	case 0:
-		printOK(useColor, "با آخرین انتشار هم‌تراز هستید (یا همان تگ pre).")
+		printOK(useColor, "با آخرین انتشار هم‌تراز هستید.")
 	case -1:
 		printWarn(useColor, "نسخهٔ جدیدتری روی GitHub هست.")
 	default:
@@ -71,7 +72,7 @@ func Run(opt Options) error {
 	fmt.Println()
 	printSection(useColor, "به‌روزرسانی صفحات")
 	fmt.Println(dim(useColor, "  faman update --pages"))
-	fmt.Println(dim(useColor, "  → pages/fa را از شاخه main به پوشهٔ کاربر می‌آورد"))
+	fmt.Println(dim(useColor, "  faman update --pages --verify   # + SHA256 از Release"))
 	fmt.Println()
 	printSection(useColor, "به‌روزرسانی باینری")
 	if runtime.GOOS == "windows" {
@@ -79,11 +80,42 @@ func Run(opt Options) error {
 	} else {
 		fmt.Println(dim(useColor, "  curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash"))
 	}
-	fmt.Println(dim(useColor, "  یا از Releases باینری آماده بگیرید"))
+	fmt.Println(dim(useColor, "  تأیید دستی: sha256sum -c SHA256SUMS"))
 	fmt.Println()
 	printSection(useColor, "لینک‌ها")
 	fmt.Println(dim(useColor, "  https://github.com/erfankasraie/Faman/releases"))
-	fmt.Println(dim(useColor, "  https://github.com/erfankasraie/Faman"))
+	return nil
+}
+
+func refreshPages(opt Options, useColor bool) error {
+	dest, err := pagesInstallDir(opt.Force)
+	if err != nil {
+		return err
+	}
+	printKV(useColor, "مقصد صفحات", dest)
+
+	if opt.Verify {
+		printOK(useColor, "دانلود از Release + تأیید SHA256SUMS…")
+		tag, name, sha, err := downloadPagesFromRelease(dest)
+		if err != nil {
+			return err
+		}
+		printKV(useColor, "تگ Release", tag)
+		printKV(useColor, "آرشیو", name)
+		printOK(useColor, "SHA256 تأیید شد: "+sha)
+	} else {
+		printOK(useColor, "دانلود آرشیو شاخه main…")
+		sha, err := downloadPagesFromMain(dest)
+		if err != nil {
+			return err
+		}
+		printKV(useColor, "SHA256 آرشیو", sha)
+		printWarn(useColor, "بدون --verify فقط هش چاپ می‌شود (main هر commit عوض می‌شود).")
+	}
+
+	n := countMD(dest)
+	printOK(useColor, fmt.Sprintf("صفحات به‌روز شد (%d فایل .md).", n))
+	fmt.Println(dim(useColor, "  export FAMAN_PAGES=\""+dest+"\""))
 	return nil
 }
 
@@ -129,41 +161,20 @@ func latestRemoteVersion() (tag, source string, err error) {
 	return tags[0].Name, "tag", nil
 }
 
-func refreshPages(force bool, useColor bool) error {
-	dest, err := pagesInstallDir(force)
-	if err != nil {
-		return err
-	}
-	printKV(useColor, "مقصد صفحات", dest)
-	printOK(useColor, "در حال دانلود آرشیو main از GitHub…")
-
-	if err := downloadPagesTo(dest); err != nil {
-		return err
-	}
-	n := countMD(dest)
-	printOK(useColor, fmt.Sprintf("صفحات به‌روز شد (%d فایل .md).", n))
-	fmt.Println(dim(useColor, "  اگر هنوز صفحات قدیمی می‌بینید:"))
-	fmt.Println(dim(useColor, "  export FAMAN_PAGES=\""+dest+"\""))
-	return nil
-}
-
 func pagesInstallDir(force bool) (string, error) {
 	if env := os.Getenv("FAMAN_PAGES"); env != "" {
 		if writableDir(env) || force {
 			return env, nil
 		}
 	}
-
 	if cur, err := parser.PagesDir(); err == nil {
 		if underHome(cur) && (writableDir(cur) || force) {
 			return cur, nil
 		}
-		// System install path: prefer user share unless --force and writable.
 		if force && writableDir(filepath.Dir(cur)) {
 			return cur, nil
 		}
 	}
-
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -324,5 +335,5 @@ func printOfflineHints(useColor bool) {
 	fmt.Println()
 	printSection(useColor, "آفلاین / دستی")
 	fmt.Println(dim(useColor, "  curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash"))
-	fmt.Println(dim(useColor, "  faman update --pages"))
+	fmt.Println(dim(useColor, "  faman update --pages --verify"))
 }
