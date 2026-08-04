@@ -1,67 +1,104 @@
 ---
 title: tmux
 aliases:
-- terminal-multiplexer
 category: shell
 difficulty: intermediate
 keywords:
-- session
-- multiplex
 - terminal
+- multiplexer
+- session
+- pane
 ---
 
 # Introduction
 
-`tmux` نشست ترمینال پایدار می‌سازد؛ با بستن SSH کارها قطع نمی‌شوند و چند پنل/پنجره دارید.
+`tmux` چند **نشست ترمینال** را نگه می‌دارد که با قطع SSH هم زنده می‌مانند: پنجره (window)، قاب (pane)، و session قابل‌اتصال مجدد.
 
 # Syntax
 
 ```
-tmux [command] [args]
+tmux [command] [options]
+tmux new -s NAME
+tmux attach -t NAME
 ```
+
+کلید پیش‌فرض prefix: **`Ctrl-b`** سپس کلید فرمان.
 
 # Options
 
-| فرمان | توضیح |
-|-------|--------|
-| `tmux` / `tmux new` | نشست جدید |
-| `tmux ls` | لیست نشست‌ها |
-| `tmux attach -t NAME` | اتصال مجدد |
-| `tmux kill-session -t NAME` | حذف نشست |
+## خط فرمان
 
-پیشوند پیش‌فرض: `Ctrl+b` سپس کلید.
+| فرمان | کار |
+|--------|-----|
+| `tmux` / `tmux new` | session جدید |
+| `tmux new -s NAME` | با نام |
+| `tmux ls` | لیست session |
+| `tmux attach -t NAME` | اتصال |
+| `tmux attach -d -t NAME` | اتصال و detach دیگران |
+| `tmux kill-session -t NAME` | کشتن session |
+| `tmux kill-server` | همه |
+
+## بعد از prefix (`Ctrl-b`)
 
 | کلید | کار |
 |------|-----|
-| `c` | پنجره جدید |
-| `"` | تقسیم افقی |
-| `%` | تقسیم عمودی |
 | `d` | detach |
-| `n` / `p` | پنجره بعدی/قبلی |
-| `←↑↓→` | جابه‌جایی بین پنل |
+| `c` | window جدید |
+| `n` / `p` | window بعد/قبل |
+| `,` | نام‌گذاری window |
+| `&` | بستن window |
+| `%` | شکاف عمودی pane |
+| `"` | شکاف افقی |
+| `←↑↓→` | جابه‌جایی بین pane |
+| `x` | بستن pane |
+| `z` | zoom pane |
+| `[` | mode کپی/اسکرول |
+| `?` | لیست کلیدها |
 
 # Examples
 
-```bash
-tmux new -s work
-# ... کار ...
-# Ctrl+b d  → detach
+## کار روی سرور
 
-tmux ls
+```bash
+ssh server
+tmux new -s work
+# ... کار طولانی ...
+# Ctrl-b d   → detach
+exit   # از ssh
+
+# بعداً:
+ssh server
 tmux attach -t work
+```
+
+## چند session
+
+```bash
+tmux ls
+tmux new -s logs
+tmux new -s build
+tmux attach -t build
+```
+
+## اسکریپت
+
+```bash
+tmux new-session -d -s job 'npm run build'
+tmux attach -t job
 ```
 
 # Common mistakes
 
-- فراموش کردن detach و بستن ترمینال (نشست می‌ماند ولی باید attach کنید).
+- بستن ترمینال بدون detach → اگر session نباشد پروسه ممکن است بمیرد (با tmux معمولاً session می‌ماند فقط اگر داخل tmux بوده باشید).
+- قاطی کردن prefix با `screen` (`Ctrl-a`).
+- scroll با چرخ ماوس بدون mode یا تنظیم terminal-overrides.
 
 # Tips
 
-- جایگزین محبوب: `zellij` یا `screen`.
-- تنظیمات در `~/.tmux.conf`.
+- کانفیگ: `~/.tmux.conf` — مثلاً `set -g mouse on`.
+- جایگزین سبک: `zellij`، `screen`.
+- برای لاگ بلند: pane جدا + `journalctl -f`.
 
 # Related commands
 
-- `screen` — قدیمی‌تر
-- `nohup` — فقط یک فرایند
-- `ssh` — ورود از راه دور
+- `screen` · `ssh` · `nohup` · `jobs`

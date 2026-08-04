@@ -8,61 +8,106 @@ keywords:
 - schedule
 - job
 - timer
+- automation
 ---
 
 # Introduction
 
-`crontab` زمان‌بندی اجرای دستورات را برای کاربر مدیریت می‌کند (سرویس cron).
+`crontab` جدول زمان‌بندی **cron** کاربر را ویرایش/نمایش می‌دهد: اجرای دورهٔ فرمان در پس‌زمینه.
+
+روی سیستم‌های systemd گاهی `systemd.timer` جایگزین مدرن است؛ cron هنوز بسیار رایج است.
 
 # Syntax
 
 ```
-crontab [-e|-l|-r]
-```
-
-قالب هر خط:
-
-```
-minute hour day month weekday command
+crontab [-u USER] FILE
+crontab [-u USER] [-e | -l | -r]
 ```
 
 # Options
 
 | گزینه | توضیح |
 |-------|--------|
-| `-e` | ویرایش crontab |
-| `-l` | نمایش |
-| `-r` | حذف همه |
-| `-u USER` | برای کاربر دیگر (root) |
+| `-e` | ویرایش جدول در ادیتور |
+| `-l` | چاپ جدول |
+| `-r` | حذف کل جدول (خطرناک) |
+| `-u USER` | برای کاربر دیگر (نیاز root) |
+| `-i` | تأیید قبل از `-r` |
+
+## فرمت هر خط
+
+```
+┌─ دقیقه (0-59)
+│ ┌─ ساعت (0-23)
+│ │ ┌─ روز ماه (1-31)
+│ │ │ ┌─ ماه (1-12)
+│ │ │ │ ┌─ روز هفته (0-7، 0 و 7 = یکشنبه)
+│ │ │ │ │
+* * * * *  command
+```
+
+| مثال زمان | معنی |
+|-----------|------|
+| `0 * * * *` | هر ساعت سر صفر |
+| `*/5 * * * *` | هر ۵ دقیقه |
+| `0 9 * * 1-5` | ۹ صبح روزهای کاری |
+| `0 0 1 * *` | اول هر ماه |
+| `@daily` | معادل روزانه (نسخه‌های Vixie/cronie) |
+| `@reboot` | بعد از بوت |
+
+متغیرهای رایج در crontab: `PATH=`, `MAILTO=`, `SHELL=`.
 
 # Examples
 
+## ویرایش و لیست
+
 ```bash
-crontab -e
 crontab -l
+crontab -e
+```
 
-# هر روز ساعت ۰۳:۳۰
-30 3 * * * /usr/local/bin/backup.sh
+نمونه خطوط:
 
-# هر ۵ دقیقه
-*/5 * * * * /usr/bin/php /var/www/cron.php
+```cron
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=""
 
-# دوشنبه‌ها ساعت ۹
-0 9 * * 1 /home/user/scripts/report.sh
+*/10 * * * * /home/alice/bin/backup.sh >> /home/alice/logs/backup.log 2>&1
+0 3 * * * /usr/bin/find /tmp -type f -mtime +7 -delete
+@reboot /home/alice/bin/onboot.sh
+```
+
+## نصب از فایل
+
+```bash
+cat > /tmp/my.cron <<'EOF'
+0 6 * * * /usr/local/bin/sync.sh
+EOF
+crontab /tmp/my.cron
+crontab -l
+```
+
+## سیستم‌واید
+
+```bash
+# معمولاً:
+ls /etc/cron.d/ /etc/cron.daily/
+# یا /etc/crontab با فیلد user اضافه
 ```
 
 # Common mistakes
 
-- استفاده از دستور نسبی بدون PATH کامل.
-- ننوشتن لاگ و نفهمیدن چرا job اجرا نشده.
+- `%` در فرمان cron معنی خاص دارد؛ باید escape شود `\%`.
+- PATH کوتاه cron → همیشه مسیر مطلق باینری.
+- `crontab -r` به‌جای `-e` و پاک شدن همه jobها.
+- فرض اینکه خروجی را می‌بینید؛ بدون redirect در ایمیل root می‌رود یا دور ریخته می‌شود.
 
 # Tips
 
-- خروجی را redirect کنید: `>> /var/log/job.log 2>&1`
-- در systemd می‌توان از timer unit هم استفاده کرد.
+- لاگ را صریح به فایل بفرستید: `>> log 2>&1`.
+- اول با `*/5` تست کنید بعد بازه را باز کنید.
+- جایگزین systemd: `systemctl edit --full my.timer`.
 
 # Related commands
 
-- `systemctl` — timerهای systemd
-- `at` — اجرای یک‌باره
-- `journalctl` — لاگ
+- `systemctl` · `journalctl` · `at` · `systemd-run`

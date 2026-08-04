@@ -2,56 +2,85 @@
 title: scp
 aliases:
 category: network
-difficulty: intermediate
+difficulty: beginner
 keywords:
 - copy
-- ssh
 - remote
+- ssh
 - transfer
 ---
 
 # Introduction
 
-`scp` (secure copy) فایل را روی SSH کپی می‌کند. برای همگام‌سازی پیشرفته‌تر `rsync` بهتر است.
+`scp` (*secure copy*) فایل/پوشه را روی کانال **SSH** کپی می‌کند. سینتکس شبیه `cp` است با `user@host:path` برای سمت remote.
+
+برای همگام‌سازی تکراری و resume، معمولاً `rsync -e ssh` بهتر است؛ scp برای کپی یک‌باره ساده کافی است.
 
 # Syntax
 
 ```
-scp [OPTIONS] SRC DEST
+scp [OPTIONS] SOURCE... DESTINATION
 ```
 
-SRC/DEST می‌تواند `user@host:path` باشد.
+SOURCE یا DEST می‌تواند محلی یا `user@host:path` باشد.
 
 # Options
 
 | گزینه | توضیح |
 |-------|--------|
-| `-r` | بازگشتی (پوشه) |
-| `-P PORT` | پورت SSH |
-| `-i KEY` | کلید خصوصی |
+| `-r` | کپی بازگشتی پوشه |
+| `-p` | حفظ زمان و mode تا حد ممکن |
+| `-P PORT` | پورت SSH (**حرف بزرگ P**؛ با ssh فرق دارد) |
+| `-i IDENTITY` | کلید خصوصی |
 | `-C` | فشرده‌سازی |
-| `-p` | حفظ زمان/مجوز |
+| `-q` | ساکت |
+| `-v` | verbose |
+| `-3` | کپی بین دو remote از طریق ماشین محلی |
+| `-o OPTION` | گزینه‌های ssh (مثل `ProxyJump`) |
+| `-F CONFIG` | فایل ssh config |
 
 # Examples
 
+## به سرور / از سرور
+
 ```bash
-scp file.txt user@server:/tmp/
-scp -r project/ user@server:~/app/
-scp -P 2222 user@server:/var/log/app.log .
-scp -i ~/.ssh/id_ed25519 file.tar.gz user@host:~
+scp report.pdf alice@server:/home/alice/
+scp alice@server:/var/log/app.log ./
+scp -r ./website alice@server:/var/www/site/
+```
+
+## پورت و کلید
+
+```bash
+scp -P 2222 -i ~/.ssh/id_ed25519 app.tgz alice@server:~/uploads/
+scp -o ProxyJump=bastion ./file alice@internal:/tmp/
+```
+
+## بین دو مسیر remote (از طریق لپ‌تاپ)
+
+```bash
+scp -3 alice@hostA:/data/out.bin bob@hostB:/data/in.bin
+```
+
+## چند فایل
+
+```bash
+scp a.txt b.txt alice@server:~/inbox/
 ```
 
 # Common mistakes
 
-- `-P` بزرگ برای پورت (در ssh کوچک `-p` است).
+- `-p` کوچک برای پورت → اشتباه؛ پورت scp **`-P`** است.
 - فراموش کردن `-r` برای پوشه.
+- فاصله در مسیر remote بدون کوتیشن.
+- انتظار resume بعد از قطع شبکه (scp از اول شروع می‌کند).
 
 # Tips
 
-- برای resume و sync: `rsync -avz -e ssh`.
+- همان `~/.ssh/config` برای Host کوتاه کار می‌کند: `scp file myserver:~/`.
+- برای درخت بزرگ: `rsync -avzP -e ssh`.
+- SFTP تعاملی: دستور `sftp`.
 
 # Related commands
 
-- `rsync`
-- `sftp`
-- `ssh`
+- `ssh` · `rsync` · `sftp` · `tar` · `curl`

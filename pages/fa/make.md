@@ -7,63 +7,115 @@ keywords:
 - build
 - makefile
 - automation
+- target
 ---
 
 # Introduction
 
-`make` بر اساس `Makefile` فقط هدف‌های لازم را می‌سازد؛ استاندارد build در پروژه‌های C/C++ و بسیاری ابزارها.
+`make` فرمان‌ها را بر اساس **Makefile** اجرا می‌کند: targetها، وابستگی‌ها، و بازسازی فقط وقتی ورودی جدیدتر است. رایج در C/C++ و هر پروژه با کارهای تکراری.
 
 # Syntax
 
 ```
-make [OPTIONS] [TARGET]
+make [OPTIONS] [TARGET...]
+make -f FILE TARGET
 ```
 
 # Options
 
 | گزینه | توضیح |
 |-------|--------|
-| `-j N` | موازی با N job |
-| `-n` | چاپ بدون اجرا |
-| `-f FILE` | Makefile دیگر |
-| `-C DIR` | تغییر پوشه |
+| `-f FILE` | نام Makefile |
+| `-j N` | اجرای موازی N job |
+| `-n` | dry-run (چاپ بدون اجرا) |
+| `-B` | اجبار rebuild |
 | `-s` | ساکت |
+| `-C DIR` | تغییر پوشه قبل از اجرا |
+| `-k` | با خطا ادامه بده |
+| `VAR=value` | متغیر از خط فرمان |
+
+## ساختار Makefile (خلاصه)
+
+```makefile
+target: dependencies
+\tcommand
+\tcommand
+```
+
+توجه: فرورفتگی دستورات باید **Tab** باشد نه فاصله.
+
+| مفهوم | معنی |
+|--------|------|
+| `$@` | نام target |
+| `$<` | اولین پیش‌نیاز |
+| `$^` | همهٔ پیش‌نیازها |
+| `.PHONY` | target غیر فایلی |
+| `VAR := value` | متغیر |
 
 # Examples
 
-```bash
-make
-make build
-make -j$(nproc)
-make clean
-make -n install
-```
-
-نمونه Makefile ساده:
+## Makefile ساده
 
 ```makefile
-.PHONY: build test clean
+.PHONY: all clean test
 
-build:
-	go build -o app .
+all: app
+
+app: main.o util.o
+\tgcc -o $@ $^
+
+%.o: %.c
+\tgcc -c -o $@ $<
 
 test:
-	go test ./...
+\t./app --test
 
 clean:
-	rm -f app
+\trm -f app *.o
+```
+
+```bash
+make
+make -j4
+make clean
+make test
+make CFLAGS='-O2 -Wall'
+```
+
+## فقط اسکریپت بدون compile
+
+```makefile
+.PHONY: run lint
+run:
+\tpython app.py
+lint:
+\truff check .
+```
+
+```bash
+make run
+make -n lint    # ببین چه اجرا می‌شود
+```
+
+## از پوشه دیگر
+
+```bash
+make -C build
+make -f Makefile.release all
 ```
 
 # Common mistakes
 
-- استفاده از فاصله به‌جای Tab در دستورات Makefile.
+- فاصله به‌جای Tab → خطای confusing.
+- target بدون `.PHONY` وقتی فایلی هم‌نام وجود دارد.
+- وابستگی ناقص → rebuild نشدن بعد از تغییر هدر.
 
 # Tips
 
-- `.PHONY` برای هدف‌هایی که فایل نیستند.
+- `make -j$(nproc)` روی لینوکس.
+- برای پروژهٔ بزرگ گاهی `ninja` / سیستم build دیگر.
+- `make help` را خودتان با یک target `help` مستند کنید.
 
 # Related commands
 
-- `cmake` — تولید Makefile/Ninja
-- `ninja` — build سریع
-- `go build` / `npm run` — ابزار زبان‌محور
+- `gcc` · `cmake` · `ninja` · `cargo` · `npm`
