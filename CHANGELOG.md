@@ -1,21 +1,40 @@
 # Changelog
 
+## [0.1.4-pre] — 2026-08-04
+
+### Added
+- **`faman update` واقعی**
+  - `--check` — مقایسه نسخه با GitHub (release/tag)
+  - `--pages` — دانلود `pages/fa` از شاخه `main` به مسیر کاربر
+  - راهنمای به‌روزرسانی باینری (get.sh / install.ps1 / Releases)
+- عمق man برای دستورات سنگین: `find`, `grep`, `sed`, `awk`, `tar`, `rsync`, `curl`
+- مدیران بسته: `dpkg`, `snap`, `flatpak`, `zypper`, `apk`, `brew`, `rpm`, `yay`, `nix`, `pip`, `npm`, `cargo`
+- محیط مجازی: `venv`, `virtualenv`, `conda`, `pyenv`, `nvm`, `asdf`, `direnv`, `poetry`, `pipenv`, `podman`, cookbook `examples-environments`
+- نصب آسان: `scripts/get.sh` (پیش‌فرض `--user`)
+
+### Docs
+- README، ROADMAP، pages-index، install، windows هم‌تراز با وضعیت فعلی
+
+### Content
+- حدود **۱۳۵+** صفحه فارسی
+
+## [0.1.3-pre] — 2026-08-0x
+
+- تگ/پیش‌انتشار میانی روی GitHub
+
 ## [0.1.2-pre] — 2026-08-02
 
 ### Added
-- Windows support on `main`: LocalAppData pages path, `scripts/install.ps1`, `docs/windows.md`
-- Central CLI logo (no per-page logo in markdown)
-- zsh / fzf / bat helper scripts
-- One-line installer with RTL/font options
-- Cross-platform release workflow (Linux, Windows, macOS)
+- پشتیبانی ویندوز روی `main`، `install.ps1`، `docs/windows.md`
+- لوگوی مرکزی CLI
+- zsh / fzf / bat
+- installer با RTL و فلگ‌های پیشرفته
+- workflow انتشار کراس‌پلتفرم
 
 ### Fixed
-- golangci-lint CI (`errcheck`, `unused`)
-- Safer Persian terminal rendering (`FAMAN_PLAIN` / `FAMAN_WRAP`)
-
-### Content
-- ~112 Persian man pages
+- CI golangci-lint
+- رندر امن‌تر فارسی
 
 ## [0.1.0] — earlier
 
-- Initial CLI, parser, renderer, search, CI
+- CLI اولیه، parser، renderer، search، CI

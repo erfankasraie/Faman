@@ -13,7 +13,7 @@ import (
 
 var (
 	// version is set at link time: -X github.com/faman-project/faman/internal/app.version=...
-	version = "0.1.2-pre"
+	version = "0.1.4-pre"
 	rootCmd = &cobra.Command{
 		Use:   "faman",
 		Short: "صفحات راهنمای فارسی لینوکس — Persian Manual Pages",
@@ -25,6 +25,7 @@ faman یک ابزار خط فرمان است که دستورات لینوکس ر
 مثال‌ها:
   faman ls
   faman search docker
+  faman update --pages
   faman version`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

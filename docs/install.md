@@ -1,23 +1,58 @@
 # نصب faman
 
-## سریع
+## سریع‌ترین راه (پیشنهادی)
+
+نصب در `~/.local` — معمولاً **بدون sudo**:
 
 ```bash
-# فقط faman
-curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash
+export PATH="$HOME/.local/bin:$PATH"
+faman version
+```
 
-# faman + فونت + UTF-8 + کمک RTL
-curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash -s -- --with-rtl
+با فونت فارسی + UTF-8 (Ubuntu و مشابه):
 
-# فقط فونت / RTL
-curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/setup-rtl.sh | bash
+```bash
+curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash -s -- --rtl
+```
+
+### ویندوز
+
+```powershell
+irm https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.ps1 | iex
+```
+
+راهنما: [windows.md](windows.md)
+
+### از Releases
+
+از [Releases](https://github.com/erfankasraie/Faman/releases) آرشیو لینوکس/ویندوز/macOS را بگیرید (باینری + `pages/fa`).
+
+```bash
+tar -xzf faman-*-linux-amd64.tar.gz
+cd faman-*-linux-amd64
+export FAMAN_PAGES="$PWD/pages/fa"
+./faman ls
 ```
 
 ---
 
-## تنظیمات پیشرفته اسکریپت
+## به‌روزرسانی بعد از نصب
 
 ```bash
+faman update --check    # نسخه محلی در برابر GitHub
+faman update --pages    # فقط صفحات را از main تازه کن
+# باینری:
+curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash
+```
+
+---
+
+## اسکریپت کامل `install.sh`
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.sh | bash
+curl -fsSL .../install.sh | bash -s -- --with-rtl
 bash scripts/install.sh --help
 ```
 
@@ -28,83 +63,33 @@ bash scripts/install.sh --help
 | `--with-rtl` | faman + فونت + locale + کمک RTL |
 | `--rtl-only` | فقط فونت/locale/RTL |
 | `--skip-deps` | نصب git/go سیستمی را رد کن |
-| `--user` | نصب در `~/.local` بدون sudo برای باینری |
-| `--prefix=DIR` | ریشه نصب (پیش‌فرض `/usr/local`) |
+| `--user` | نصب در `~/.local` |
+| `--prefix=DIR` | ریشه نصب |
 | `--branch=NAME` | شاخه یا تگ git |
-| `--repo=URL` | آدرس مخزن |
-| `--from-dir=PATH` | ساخت از کلون موجود |
-| `--no-mlterm` | mlterm نصب نشود |
-| `--no-shell-rc` | `.bashrc` / `.zshrc` دست نخورد |
-| `--locale=en\|fa` | locale ترجیحی UTF-8 |
-| `--plain-default` | `FAMAN_PLAIN=1` پیش‌فرض در shell |
-| `--uninstall` | حذف باینری و pages از PREFIX |
-| `--dry-run` | فقط چاپ کارها |
-| `--verbose` | لاگ بیشتر |
+| `--plain-default` | `FAMAN_PLAIN=1` در shell rc |
+| `--uninstall` | حذف |
+| `--dry-run` | فقط چاپ |
 
 ### مثال‌ها
 
 ```bash
-# نصب کاربر بدون root برای باینری
-bash scripts/install.sh --user --with-rtl
-
-# خروجی ساده فارسی به‌صورت پیش‌فرض
-bash scripts/install.sh --with-rtl --plain-default --locale=fa
-
-# از کلون فعلی
-cd Faman && bash scripts/install.sh --from-dir=. --skip-deps --with-rtl
-
-# پیش‌نمایش
-bash scripts/install.sh --with-rtl --dry-run --verbose
-
-# حذف
-bash scripts/install.sh --uninstall
+bash scripts/install.sh --user --with-rtl --plain-default
+bash scripts/install.sh --from-dir=. --skip-deps
 bash scripts/install.sh --user --uninstall
 ```
 
-### فایل کانفیگ دائمی
+### کانفیگ دائمی
 
-```bash
-mkdir -p ~/.config/faman
-cp ~/.config/faman/install.env.example ~/.config/faman/install.env   # بعد از یک‌بار اجرای --with-rtl
-# یا دستی:
-cat > ~/.config/faman/install.env <<'EOF'
-PREFIX=$HOME/.local
-USER_INSTALL=1
-WITH_RTL=1
-PLAIN_DEFAULT=1
-LOCALE_PREF=fa
-NO_MLTERM=0
-NO_SHELL_RC=0
-BRANCH=main
-EOF
-
-bash scripts/install.sh   # مقادیر از فایل خوانده می‌شوند؛ CLI اولویت دارد
-```
-
-مسیر کانفیگ با `FAMAN_INSTALL_CONFIG` قابل تغییر است.
-
-### متغیرهای محیطی
-
-| متغیر | نقش |
-|--------|------|
-| `FAMAN_REPO_URL` | URL کلون |
-| `FAMAN_BRANCH` | شاخه |
-| `PREFIX` | مسیر نصب |
-| `FAMAN_INSTALL_CONFIG` | مسیر فایل env |
+`~/.config/faman/install.env` — نمونه بعد از `--with-rtl` در `install.env.example`.
 
 ---
 
-## بعد از نصب (یک‌بار دستی)
+## بعد از نصب
 
-### GNOME Terminal
+### فونت ترمینال
 
-Preferences → Custom font → `Vazirmatn` / `DejaVu Sans Mono`
-
-### VS Code
-
-```json
-"terminal.integrated.fontFamily": "Vazirmatn, DejaVu Sans Mono, monospace"
-```
+GNOME: Preferences → Custom font → Vazirmatn / DejaVu Sans Mono  
+جزئیات: [terminal-persian.md](terminal-persian.md)
 
 ### اگر حروف خراب است
 
@@ -113,14 +98,10 @@ export LANG=en_US.UTF-8
 FAMAN_PLAIN=1 faman ls
 ```
 
-بیشتر: [terminal-persian.md](terminal-persian.md)
-
-## حذف دستی
+## حذف
 
 ```bash
-sudo rm -f /usr/local/bin/faman
-sudo rm -rf /usr/local/share/faman
-# یا برای --user:
-rm -f ~/.local/bin/faman
-rm -rf ~/.local/share/faman
+rm -f ~/.local/bin/faman && rm -rf ~/.local/share/faman
+# یا سیستم‌واید:
+sudo rm -f /usr/local/bin/faman && sudo rm -rf /usr/local/share/faman
 ```

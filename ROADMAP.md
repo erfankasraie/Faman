@@ -1,106 +1,58 @@
 # Roadmap — faman
 
-نقشهٔ راه دقیق بر اساس وضعیت مخزن.
+به‌روز: **۲۰۲۶-۰۸-۰۴** · نسخه هدف ریلیز: **`0.1.4-pre`**
 
 ---
 
-## وضعیت فعلی (Snapshot)
+## وضعیت فعلی
 
 | محور | وضعیت |
 |------|--------|
-| نسخهٔ کد | `0.1.2-pre` |
-| صفحات فارسی | **~۱۳۵+** در `pages/fa/` |
-| CLI | cobra: show / search / version / help / update / completion |
-| رندر | glamour + lipgloss؛ لوگو مرکزی؛ `FAMAN_PLAIN` / `FAMAN_WRAP` |
-| نصب | `get.sh` (آسان)، `install.sh`، `install.ps1` (ویندوز) |
-| شل | zsh / fzf / bat |
-| CI / Release | Actions CI + workflow تگ `v*` |
-| عمق man | در حال غنی‌سازی دستورات پربازدید |
-
-**معیار پوشش:** حدود ۲۰۰–۲۵۰ دستور هسته‌ای. با ~۱۳۵ صفحه ≈ **نیمهٔ مسیر محتوا**.
+| نسخه | `0.1.4-pre` |
+| صفحات | ~۱۳۵+ |
+| `faman update` | چک GitHub + `--pages` |
+| نصب | `get.sh` / `install.sh` / `install.ps1` |
+| عمق man | find/grep/sed/awk/tar/rsync/curl |
+| CI / Release workflow | فعال |
 
 ---
 
-## اصول اولویت
+## همین ریلیز (v0.1.4-pre) — انجام‌شده / در حال بستن
 
-1. **کیفیت و عمق > تعداد خام** — برای دستوراتی که man طولانی دارند، گزینه‌ها و مثال‌های عملی پوشش داده شود (نه کپی خام man).
-2. **قابل‌نصب روی Ubuntu و Windows**
-3. **CLI پایدار قبل از TUI**
-4. **محتوا منبع حقیقت است**
-
-### سیاست عمق صفحه
-
-| نوع دستور | انتظار faman |
-|-----------|----------------|
-| man کوتاه (`true`, `yes`) | کوتاه آموزشی |
-| man متوسط | قالب ۷ بخشی کامل |
-| man سنگین (`find`, `grep`, `tar`, `rsync`, `curl`, `ssh`, `git`, …) | جداول گزینهٔ گسترده + چند سناریوی عملی + اشتباهات رایج |
+- [x] update واقعی (check + pages)
+- [x] مدیران بسته و محیط مجازی
+- [x] عمق man دستهٔ اول
+- [x] مستندات install / update / README / CHANGELOG
+- [ ] تگ `v0.1.4-pre` + آرتیفکت لینوکس/ویندوز روی GitHub Releases
+- [ ] عمق man دستهٔ دوم: ssh, git, docker, systemctl, journalctl, chmod, ip, tmux, jq, make
 
 ---
 
-## فاز ۰ — تثبیت (v0.1.2)
+## مرحله بعد — کوتاه‌مدت (۱–۲ هفته)
 
-### محتوا
-- [x] `docs/pages-index.md` دسته‌بندی‌شده
-- [x] مدیران بسته + محیط مجازی
-- [x] عمق man برای: `find`, `grep`, `sed`, `awk`, `tar`, `rsync`, `curl`
-- [ ] عمق man برای: `ssh`, `scp`, `git`, `docker`, `systemctl`, `journalctl`, `chmod`, `ip`, `tmux`, `make`, `crontab`, `jq`
-- [ ] ممیزی front matter همهٔ صفحات
-- [ ] `scripts/check-pages.sh`
+1. **محتوا:** غنی‌سازی man سنگین باقی‌مانده + ۲۰ صفحه کمبود (dd, htop, ssh-keygen, xz, …)
+2. **کیفیت:** `scripts/check-pages.sh` (front matter، حداقل طول)
+3. **CLI:** `faman list` / `faman categories` / `faman doctor`
+4. **Release:** goreleaser یا همین workflow روی هر تگ پایدار
 
-### محصول
-- [x] installer آسان + ویندوز + نسخه pre در README
-- [ ] تگ GitHub Pre-release با آرتیفکت (Actions → Release)
-- [ ] اسکرین‌شات ترمینال در README
+## میان‌مدت — v0.2.0
 
-**خروجی:** تگ `v0.1.2-pre` / `v0.1.2`.
-
----
-
-## فاز ۱ — پوشش محتوا (~۱۵۰–۱۶۰ صفحه)
-
-کمبودها: `dd`, `fdisk`, `htop`, `strace`, `nmap` پایه, `ssh-keygen`, `setfacl`, `xz`, `zstd`, `gcc` پایه, …
-
-قوانین: مقدمه، نحو، گزینه‌های پرکاربرد (و برای man سنگین: جدول کامل‌تر)، ≥۳ مثال، اشتباه رایج، مرتبط‌ها.
-
----
-
-## فاز ۲ — CLI محصولی (v0.2.0)
-
-- `faman list` / `categories` / `random` / `doctor`
 - search با `--cat`
 - completion نام صفحات
-- `faman update` واقعی یا embed صفحات
+- update باینری از آرتیفکت Release (اختیاری)
+- ≥۱۵۰ صفحه
+
+## بلندمدت — v0.3 → v1.0
+
+- AUR / deb
+- checksum صفحات
+- TUI بعد از قفل فرمت صفحه
+- ≥۲۰۰ صفحه باکیفیت
 
 ---
 
-## فاز ۳ — توزیع (v0.3.0)
+## اصول
 
-- goreleaser، AUR، deb
-- به‌روزرسانی صفحات کاربر
-
----
-
-## فاز ۴ — TUI (v0.4.0)
-
-بعد از قفل فرمت صفحه.
-
----
-
-## فاز ۵ — v1.0
-
-≥۲۰۰ صفحهٔ باکیفیت، schema قفل، semver پایدار.
-
----
-
-## متریک
-
-| متریک | هدف v0.2 | هدف v1.0 |
-|--------|----------|----------|
-| صفحات fa | ≥ ۱۵۰ | ≥ ۲۰۰ |
-| صفحات «عمیق» برای man سنگین | ≥ ۱۵ | ≥ ۳۰ |
-| نصب بدون Go | بله | بله |
-
----
-
-آخرین به‌روزرسانی رودمپ: ۲۰۲۶-۰۸-۰۴
+1. عمق man سنگین > تعداد خام
+2. نصب زیر ۲ دقیقه
+3. صفحات جدا از باینری قابل‌به‌روزرسانی (`update --pages`)
