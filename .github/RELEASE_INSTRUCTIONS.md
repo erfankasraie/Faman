@@ -1,30 +1,27 @@
-# Cutting a release
+# Cutting release v0.2.0 (stable, not prerelease)
 
-## v0.1.4-pre (current)
+## بعد از merge شدن نسخه 0.2.0 روی main
 
-### Option A — Actions (recommended)
+### Actions (پیشنهادی)
 
-1. Open [Actions → Release](https://github.com/erfankasraie/Faman/actions/workflows/release.yml)
+1. [Actions → Release](https://github.com/erfankasraie/Faman/actions/workflows/release.yml)
 2. **Run workflow**
-3. Tag: `v0.1.4-pre`
-4. prerelease: **true**
+3. Tag: **`v0.2.0`**
+4. prerelease: **false** (خاموش)
 5. Run
 
-This builds Linux / Windows / macOS archives (binary + `pages/fa`) and publishes a GitHub Pre-release.
+workflow اگر تگ شامل `pre|rc|alpha|beta` نباشد، `prerelease=false` می‌گذارد.
 
-### Option B — Git tag
+### Git
 
 ```bash
 git checkout main && git pull
-git tag -a v0.1.4-pre -m "faman v0.1.4-pre"
-git push origin v0.1.4-pre
+git tag -a v0.2.0 -m "faman v0.2.0"
+git push origin v0.2.0
 ```
 
-### After publish
+### تأیید
 
-- Verify: https://github.com/erfankasraie/Faman/releases
-- Smoke: download linux amd64 tarball → `./faman version` → `./faman update --check`
-
-### Version in code
-
-`internal/app/root.go` → `version = "0.1.4-pre"` (override with `-ldflags` in CI).
+- https://github.com/erfankasraie/Faman/releases/tag/v0.2.0
+- باید **Latest** باشد نه Pre-release
+- آرتیفکت: linux/darwin tar.gz + windows zip

@@ -1,51 +1,40 @@
 # Roadmap — faman
 
 آخرین به‌روزرسانی: **۲۰۲۶-۰۸-۰۴**  
-نسخهٔ کد: **`0.2.0-pre`**
+نسخهٔ پایدار: **`0.2.0`**
 
 ---
 
-## وضعیت فعلی
+## وضعیت
 
 | محور | مقدار |
 |------|--------|
 | صفحات | ~۱۶۳ |
-| CLI | show · search · **list · categories · random · doctor** · update · version |
-| کیفیت | `check-pages.sh` در CI |
-| عمق man | فاز ۱ کامل |
-| نصب | get.sh / install / package / docs پلتفرم |
+| CLI | show · search · list · categories · random · doctor · update |
+| انتشار | **v0.2.0 stable** (بدون pre) |
+| check-pages | در CI |
 
 ---
 
-## فازها
+## انجام‌شده تا v0.2.0
 
-### فاز ۰ — pre-release · تقریباً تمام
-تگ GitHub Releases هنوز با maintainer است.
+- [x] فاز ۱ عمق man
+- [x] فاز ۲ check-pages + CI
+- [x] فاز ۳: list / categories / random / doctor
+- [x] نسخه 0.2.0 در کد + CHANGELOG
 
-### فاز ۱ — عمق man · **[x]**
-### فاز ۲ — check-pages + CI · **[x]** (aliases یکنواخت اختیاری مانده)
+## بعدی (پس از v0.2.0)
 
-### فاز ۳ — CLI محصولی · **بخش عمده [x]**
-
-| # | کار | وضعیت |
-|---|-----|--------|
-| 3.1 | `faman list` (`--cat` `--diff` `--names`) | [x] |
-| 3.2 | `faman categories` | [x] |
-| 3.3 | `faman random` (`--open`) | [x] |
-| 3.4 | `faman doctor` | [x] |
-| 3.5 | search `--cat` | [ ] |
-| 3.6 | completion نام صفحات | [ ] |
-| 3.7 | ≥۱۵۰ صفحه | [x] (~۱۶۳) |
-| 3.8 | تگ `v0.2.0` / pre | [ ] |
-
-### فاز ۴+ — صفحات کمبود · deb در Release · TUI · v1.0
+| # | کار |
+|---|-----|
+| 1 | completion نام صفحات |
+| 2 | `search --cat` |
+| 3 | deb روی Release workflow |
+| 4 | صفحات کمبود بیشتر |
+| 5 | v0.3.0 توزیع |
 
 ---
 
-## بعدی
+## خارج از محدوده فعلاً
 
-1. completion برای نام صفحات  
-2. `search --cat`  
-3. تگ Release `v0.2.0-pre`  
-4. deb در workflow  
-"}, {
+AI داخل باینری · TUI قبل از قفل فرمت · i18n
