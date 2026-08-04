@@ -12,7 +12,7 @@
   <a href="https://github.com/erfankasraie/Faman/actions/workflows/ci.yml"><img src="https://github.com/erfankasraie/Faman/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
   <a href="https://github.com/erfankasraie/Faman/releases"><img src="https://img.shields.io/github/v/release/erfankasraie/Faman?include_prereleases&label=release" alt="Release"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"/></a>
-  <img src="https://img.shields.io/badge/pages-135+-green" alt="pages"/>
+  <img src="https://img.shields.io/badge/pages-163+-green" alt="pages"/>
 </p>
 
 > faman is **not** a translator — it **teaches** Linux commands in Persian.
@@ -67,7 +67,7 @@ faman version
 
 ## امکانات
 
-- ۱۳۵+ صفحه فارسی
+- ۱۶۳+ صفحه فارسی
 - `faman update --check` / `--pages`
 - لینوکس · macOS · ویندوز
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Content
+- ۲۸ صفحه جدید برای پوشش بیشتر دستورات رایج man لینوکس:
+  - سیستم/سخت‌افزار: `dmesg`, `lscpu`, `lsusb`, `lspci`, `cal`
+  - پردازش: `htop`, `killall`, `nice`, `renice`, `strace`, `at`
+  - متن: `printf`, `paste`, `join`, `comm`, `column`, `split`, `bc`
+  - فایل‌سیستم: `dd`, `mktemp`, `readlink`, `shred`
+  - شبکه/امنیت: `openssl`, `ssh-keygen`, `gpg`, `whois`, `nslookup`, `netstat`
+- مجموع صفحات از ۱۳۵+ به ۱۶۳+ رسید
+
 ## [0.1.4-pre] — 2026-08-04
 
 ### Added
