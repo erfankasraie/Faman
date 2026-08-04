@@ -1,85 +1,51 @@
 # Roadmap — faman
 
 آخرین به‌روزرسانی: **۲۰۲۶-۰۸-۰۴**  
-نسخهٔ کد فعلی: **`0.1.4-pre`**  
-معیار پوشش کامل محتوا: حدود **۲۰۰–۲۵۰** دستور رایج
-
-> هماهنگی چند contributor/AI: قبل از edit گسترده روی `pages/fa` یا README، `git pull` و commitهای اخیر را چک کنید.
+نسخهٔ کد: **`0.2.0-pre`**
 
 ---
 
-## ۱. وضعیت فعلی (Snapshot)
+## وضعیت فعلی
 
 | محور | مقدار |
 |------|--------|
-| صفحات `pages/fa` | ~۱۶۰+ (فاز محتوا موازی) |
-| CLI | show · search · version · help · update · completion |
-| `faman update` | `--check` + `--pages` |
-| نصب / بسته‌بندی | get.sh · install · package.sh · docs پلتفرم |
-| عمق man | دستهٔ ۱ + دستهٔ ۲ (فاز ۱) |
-| کیفیت صفحات | `scripts/check-pages.sh` + گام CI |
-| CI | Actions + golangci-lint + check-pages |
+| صفحات | ~۱۶۳ |
+| CLI | show · search · **list · categories · random · doctor** · update · version |
+| کیفیت | `check-pages.sh` در CI |
+| عمق man | فاز ۱ کامل |
+| نصب | get.sh / install / package / docs پلتفرم |
 
 ---
 
-## ۲. اصول اولویت
+## فازها
 
-1. عمق man سنگین > تعداد خام  
-2. قالب ۷ بخشی آموزشی  
-3. نصب < ۲ دقیقه  
-4. صفحات جدا با `update --pages`  
-5. هر فاز معیار پذیرش دارد  
-6. **از تداخل فایل اجتناب:** تغییرات اسکریپت/CI جدا از bulk content
+### فاز ۰ — pre-release · تقریباً تمام
+تگ GitHub Releases هنوز با maintainer است.
 
----
+### فاز ۱ — عمق man · **[x]**
+### فاز ۲ — check-pages + CI · **[x]** (aliases یکنواخت اختیاری مانده)
 
-## ۳. فازها
-
-### فاز ۰ — `v0.1.4-pre` · تقریباً تمام
+### فاز ۳ — CLI محصولی · **بخش عمده [x]**
 
 | # | کار | وضعیت |
 |---|-----|--------|
-| 0.1–0.4, 0.6 | نسخه، docs، update، packaging، CI lint | [x] |
-| 0.5 | تگ + آرتیفکت GitHub Releases | [ ] maintainer |
+| 3.1 | `faman list` (`--cat` `--diff` `--names`) | [x] |
+| 3.2 | `faman categories` | [x] |
+| 3.3 | `faman random` (`--open`) | [x] |
+| 3.4 | `faman doctor` | [x] |
+| 3.5 | search `--cat` | [ ] |
+| 3.6 | completion نام صفحات | [ ] |
+| 3.7 | ≥۱۵۰ صفحه | [x] (~۱۶۳) |
+| 3.8 | تگ `v0.2.0` / pre | [ ] |
 
-### فاز ۱ — عمق man دستهٔ دوم · **[x] تمام**
-
-ssh · scp · git · docker · systemctl · journalctl · chmod · ip · tmux · jq · make · crontab  
-(+ قبلی: find · grep · sed · awk · tar · rsync · curl)
-
-### فاز ۲ — کیفیت و ممیزی · **در حال انجام**
-
-| # | کار | وضعیت |
-|---|-----|--------|
-| 2.1 | `scripts/check-pages.sh` | [x] |
-| 2.2 | اتصال به CI (`Check pages schema`) | [x] |
-| 2.3 | یکنواختی aliases/keywords | [ ] |
-| 2.4 | ممیزی صفحات کم‌حجم / ناقص | [x] baseline (nslookup/whois) |
-
-### فاز ۳ — CLI `v0.2.0` · بعدی بعد از تثبیت ۲.۳
-
-`list` · `categories` · `random` · `doctor` · search `--cat` · completion · ≥۱۵۰ صفحه (تعداد الان قبلاً عبور کرده)
-
-### فاز ۴ — صفحات کمبود
-
-ادامهٔ پوشش موازی؛ هماهنگ با contributor دیگر تا duplicate title نشود.
-
-### فاز ۵–۷
-
-توزیع deb/rpm · TUI · v1.0
+### فاز ۴+ — صفحات کمبود · deb در Release · TUI · v1.0
 
 ---
 
-## ۴. ترتیب هفتگی
+## بعدی
 
-| هفته | تمرکز |
-|------|--------|
-| جاری | تثبیت فاز ۲ + عدم تداخل با صفحات جدید |
-| +۱ | `faman list` / `doctor` |
-| +۲ | آماده‌سازی v0.2.0 + Release |
-
----
-
-## ۵. خارج از محدوده
-
-AI داخل باینری · RTL کامل همه‌جا · i18n زودهنگام
+1. completion برای نام صفحات  
+2. `search --cat`  
+3. تگ Release `v0.2.0-pre`  
+4. deb در workflow  
+"}, {
