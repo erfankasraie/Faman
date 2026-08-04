@@ -14,15 +14,27 @@ if [[ ! -d "$PAGES" ]]; then
   exit 1
 fi
 
+# Exact front-matter keys (start of line)
 required_fm=(title: category: difficulty:)
-required_h=(
-  "# Introduction"
-  "# Syntax"
-  "# Options"
-  "# Examples"
-  "# Common mistakes"
-  "# Tips"
-  "# Related commands"
+
+# Section patterns: heading line must match (allow suffixes like "# Options / Commands")
+required_patterns=(
+  '^# Introduction([[:space:]].*)?$'
+  '^# Syntax([[:space:]].*)?$'
+  '^# Options([[:space:]/].*)?$'
+  '^# Examples([[:space:]].*)?$'
+  '^# Common mistakes([[:space:]].*)?$'
+  '^# Tips([[:space:]].*)?$'
+  '^# Related commands([[:space:]].*)?$'
+)
+section_names=(
+  "Introduction"
+  "Syntax"
+  "Options"
+  "Examples"
+  "Common mistakes"
+  "Tips"
+  "Related commands"
 )
 MIN_BYTES=280
 
@@ -53,11 +65,13 @@ for f in "$PAGES"/*.md; do
     errors=$((errors + 1))
   fi
 
-  for h in "${required_h[@]}"; do
-    if ! grep -qFx "$h" "$f"; then
-      echo "FAIL  $base  missing section: $h"
+  i=0
+  for pat in "${required_patterns[@]}"; do
+    if ! grep -qE "$pat" "$f"; then
+      echo "FAIL  $base  missing section: ${section_names[$i]}"
       errors=$((errors + 1))
     fi
+    i=$((i + 1))
   done
 
   if ! grep -q '^keywords:' "$f"; then
