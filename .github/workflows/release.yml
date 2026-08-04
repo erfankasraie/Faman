@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (e.g. v0.1.3)'
+        description: 'Tag to release (e.g. v0.2.0)'
         required: true
-        default: 'v0.1.3'
+        default: 'v0.2.0'
       prerelease:
-        description: 'Mark as release'
+        description: 'Mark as pre-release'
         type: boolean
-        default: true
+        default: false
 
 permissions:
   contents: write
@@ -45,7 +45,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if echo "$TAG" | grep -qiE 'pre|rc|alpha|beta'; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          elif [ "${{ inputs.prerelease }}" = "true" ]; then
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.prerelease }}" = "true" ]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
@@ -98,48 +98,89 @@ jobs:
           (cd dist && sha256sum faman-*.tar.gz faman-*.zip > SHA256SUMS)
           ls -lh dist/faman-*.tar.gz dist/faman-*.zip dist/SHA256SUMS
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.ver.outputs.tag }}
-          name: faman ${{ steps.ver.outputs.tag }}
-          prerelease: ${{ steps.ver.outputs.prerelease == 'true' }}
-          generate_release_notes: true
-          body: |
-            ## faman ${{ steps.ver.outputs.tag }}
-
-            Pre-built binaries **with** `pages/fa` included.
-
-            | Archive | Platform |
-            |---------||----------|
-            | `faman-${{ steps.ver.outputs.version }}-linux-amd64.tar.gz` | Linux x86_64 |
-            | `faman-${{ steps.ver.outputs.version }}-linux-arm64.tar.gz` | Linux ARM64 |
-            | `faman-${{ steps.ver.outputs.version }}-windows-amd64.zip` | Windows x64 |
-            | `faman-${{ steps.ver.outputs.version }}-darwin-amd64.tar.gz` | macOS Intel |
-            | `faman-${{ steps.ver.outputs.version }}-darwin-arm64.tar.gz` | macOS Apple Silicon |
-
-            ### Linux
-            ```bash
-            tar -xzf faman-${{ steps.ver.outputs.version }}-linux-amd64.tar.gz
-            cd faman-${{ steps.ver.outputs.version }}-linux-amd64
-            export FAMAN_PAGES="$PWD/pages/fa"
-            ./faman version
-            ./faman ls
-            ```
-
-            ### Windows
-            ```powershell
-            Expand-Archive faman-${{ steps.ver.outputs.version }}-windows-amd64.zip
-            cd faman-${{ steps.ver.outputs.version }}-windows-amd64
-            $env:FAMAN_PAGES = "$PWD\pages\fa"
-            .\faman.exe version
-            .\faman.exe ls
-            ```
-
-            Docs: [windows.md](https://github.com/erfankasraie/Faman/blob/main/docs/windows.md)
-          files: |
-            dist/faman-*.tar.gz
-            dist/faman-*.zip
-            dist/SHA256SUMS
+      - name: Write release notes
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          cat > dist/RELEASE_NOTES.md <<EOF
+          ## faman ${TAG}
+
+          Pre-built binaries **with** \`pages/fa\` included.
+
+          | Archive | Platform |
+          |---------|----------|
+          | \`faman-${VERSION}-linux-amd64.tar.gz\` | Linux x86_64 |
+          | \`faman-${VERSION}-linux-arm64.tar.gz\` | Linux ARM64 |
+          | \`faman-${VERSION}-windows-amd64.zip\` | Windows x64 |
+          | \`faman-${VERSION}-darwin-amd64.tar.gz\` | macOS Intel |
+          | \`faman-${VERSION}-darwin-arm64.tar.gz\` | macOS Apple Silicon |
+
+          ### Linux
+          \`\`\`bash
+          tar -xzf faman-${VERSION}-linux-amd64.tar.gz
+          cd faman-${VERSION}-linux-amd64
+          export FAMAN_PAGES="\$PWD/pages/fa"
+          ./faman version
+          ./faman ls
+          \`\`\`
+
+          ### Windows
+          \`\`\`powershell
+          Expand-Archive faman-${VERSION}-windows-amd64.zip
+          cd faman-${VERSION}-windows-amd64
+          \$env:FAMAN_PAGES = "\$PWD\\pages\\fa"
+          .\\faman.exe version
+          .\\faman.exe ls
+          \`\`\`
+
+          Docs: [windows.md](https://github.com/erfankasraie/Faman/blob/main/docs/windows.md) · [packaging.md](https://github.com/erfankasraie/Faman/blob/main/docs/packaging.md)
+          EOF
+
+      # Immutable releases: attach ALL assets while still a draft, then publish once.
+      - name: Create draft release with assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          PRERELEASE: ${{ steps.ver.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          # If a broken/partial release exists for this tag, remove it (keep git tag).
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Existing release $TAG found — deleting so assets can be re-attached"
+            gh release delete "$TAG" -y || true
+          fi
+
+          EXTRA=()
+          if [ "$PRERELEASE" = "true" ]; then
+            EXTRA+=(--prerelease)
+          fi
+
+          # Ensure tag exists on remote when using workflow_dispatch without a push tag
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            git tag "$TAG" || true
+          fi
+          git push origin "refs/tags/$TAG" 2>/dev/null || true
+
+          gh release create "$TAG" \
+            --title "faman $TAG" \
+            --notes-file dist/RELEASE_NOTES.md \
+            --draft \
+            "${EXTRA[@]}" \
+            dist/faman-*.tar.gz \
+            dist/faman-*.zip \
+            dist/SHA256SUMS
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          PRERELEASE: ${{ steps.ver.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          if [ "$PRERELEASE" = "true" ]; then
+            gh release edit "$TAG" --draft=false --prerelease
+          else
+            gh release edit "$TAG" --draft=false --latest
+          fi
+          gh release view "$TAG" --json isDraft,isPrerelease,url,releaseAssets --jq '{url, isDraft, isPrerelease, assets: [.releaseAssets[].name]}'
