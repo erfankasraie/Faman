@@ -137,7 +137,6 @@ jobs:
           Docs: [windows.md](https://github.com/erfankasraie/Faman/blob/main/docs/windows.md) · [packaging.md](https://github.com/erfankasraie/Faman/blob/main/docs/packaging.md)
           EOF
 
-      # Immutable releases: attach ALL assets while still a draft, then publish once.
       - name: Create draft release with assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -145,7 +144,6 @@ jobs:
           PRERELEASE: ${{ steps.ver.outputs.prerelease }}
         run: |
           set -euo pipefail
-          # If a broken/partial release exists for this tag, remove it (keep git tag).
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Existing release $TAG found — deleting so assets can be re-attached"
             gh release delete "$TAG" -y || true
@@ -156,7 +154,6 @@ jobs:
             EXTRA+=(--prerelease)
           fi
 
-          # Ensure tag exists on remote when using workflow_dispatch without a push tag
           if ! git rev-parse "$TAG" >/dev/null 2>&1; then
             git tag "$TAG" || true
           fi
@@ -166,6 +163,7 @@ jobs:
             --title "faman $TAG" \
             --notes-file dist/RELEASE_NOTES.md \
             --draft \
+            --target "${{ github.sha }}" \
             "${EXTRA[@]}" \
             dist/faman-*.tar.gz \
             dist/faman-*.zip \
@@ -183,4 +181,6 @@ jobs:
           else
             gh release edit "$TAG" --draft=false --latest
           fi
-          gh release view "$TAG" --json isDraft,isPrerelease,url,releaseAssets --jq '{url, isDraft, isPrerelease, assets: [.releaseAssets[].name]}'
+          # Field name is "assets" (not releaseAssets) on current gh CLI
+          gh release view "$TAG" --json isDraft,isPrerelease,url,assets \
+            --jq '{url, isDraft, isPrerelease, assets: [.assets[].name]}'
