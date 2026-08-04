@@ -1,19 +1,18 @@
 ---
 title: systemctl
 aliases:
-- service
 category: system
 difficulty: intermediate
 keywords:
 - systemd
 - service
-- daemon
 - unit
+- daemon
 ---
 
 # Introduction
 
-`systemctl` ابزار اصلی کنترل **systemd** است: شروع، توقف، فعال‌سازی و وضعیت سرویس‌ها (unitها).
+`systemctl` رابط اصلی **systemd** است: شروع/توقف سرویس، enable هنگام بوت، وضعیت unitها، و کنترل ماشین (reboot).
 
 # Syntax
 
@@ -21,49 +20,88 @@ keywords:
 systemctl [OPTIONS] COMMAND [UNIT...]
 ```
 
-# Options / Commands
+واحدها معمولاً پسوند دارند: `.service`, `.socket`, `.timer`, `.target`.
 
-| دستور | توضیح |
-|-------|--------|
-| `status UNIT` | وضعیت سرویس |
+# Options
+
+## فرمان‌های سرویس
+
+| فرمان | کار |
+|--------|-----|
 | `start UNIT` | شروع |
 | `stop UNIT` | توقف |
 | `restart UNIT` | راه‌اندازی مجدد |
-| `reload UNIT` | بارگذاری مجدد تنظیمات |
-| `enable UNIT` | شروع خودکار در بوت |
-| `disable UNIT` | غیرفعال کردن شروع خودکار |
-| `list-units` | لیست unitهای فعال |
-| `daemon-reload` | بارگذاری مجدد unit فایل‌ها |
+| `reload UNIT` | بارگذاری دوبارهٔ کانفیگ (اگر پشتیبانی شود) |
+| `status UNIT` | وضعیت و آخرین لاگ |
+| `enable UNIT` | استارت در بوت |
+| `disable UNIT` | خلاف enable |
+| `is-active UNIT` | کد خروج فعال بودن |
+| `is-enabled UNIT` | آیا enable است |
+| `mask UNIT` | جلوگیری کامل از start |
+| `unmask UNIT` | لغو mask |
+| `daemon-reload` | بعد از تغییر unit فایل |
+| `list-units --type=service` | سرویس‌های بارشده |
+| `list-unit-files` | همهٔ unit فایل‌ها |
+| `cat UNIT` | مسیر و محتوای unit |
+| `edit UNIT` | override |
+| `reboot` / `poweroff` | خاموش/ری‌استارت سیستم |
+
+## گزینه‌های سراسری
+
+| گزینه | توضیح |
+|-------|--------|
+| `--user` | systemd کاربر (نه سیستم) |
+| `-l` | خروجی کامل (نه truncate) |
+| `--no-pager` | بدون less |
+| `--failed` | فقط failed |
 
 # Examples
 
+## روزمره
+
 ```bash
-# وضعیت nginx
-systemctl status nginx
+sudo systemctl status nginx
+sudo systemctl restart nginx
+sudo systemctl enable --now nginx   # enable + start
+sudo systemctl disable --now nginx
+```
 
-# شروع و فعال‌سازی
-sudo systemctl start nginx
-sudo systemctl enable nginx
+## عیب‌یابی
 
-# راه‌اندازی مجدد
-sudo systemctl restart ssh
+```bash
+systemctl --failed
+systemctl status ssh
+journalctl -u ssh -e
+systemctl cat nginx.service
+```
 
-# لیست سرویس‌های در حال اجرا
-systemctl list-units --type=service --state=running
+## بعد از نوشتن unit جدید
+
+```bash
+sudo cp myapp.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now myapp
+```
+
+## سطح کاربر
+
+```bash
+systemctl --user status podman.socket
+systemctl --user enable --now syncthing
 ```
 
 # Common mistakes
 
-- فراموش کردن `daemon-reload` بعد از ویرایش فایل unit.
-- اشتباه گرفتن `enable` (بوت) با `start` (همین الان).
+- `start` بدون `enable` → بعد از reboot سرویس بالا نمی‌آید.
+- ویرایش unit بدون `daemon-reload`.
+- `mask` کردن و فراموش کردن `unmask`.
+- اشتباه گرفتن نام: `nginx` در برابر `nginx.service` (معمولاً هر دو ok).
 
 # Tips
 
-- لاگ سرویس: `journalctl -u nginx -f`
-- نام unit معمولاً با `.service` تمام می‌شود ولی اغلب می‌توان آن را حذف کرد.
+- برای لاگ همیشه با `journalctl -u` جفت کنید.
+- `systemctl list-timers` برای کارهایی که قبلاً cron بودند.
 
 # Related commands
 
-- `journalctl` — لاگ‌های systemd
-- `service` — رابط قدیمی‌تر
-- `systemctl cat UNIT` — محتوای unit فایل
+- `journalctl` · `hostnamectl` · `timedatectl` · `loginctl` · `service` (قدیمی)
