@@ -30,7 +30,8 @@ errors=0
 warnings=0
 count=0
 
-while IFS= read -r -d '' f; do
+shopt -s nullglob
+for f in "$PAGES"/*.md; do
   count=$((count + 1))
   base="$(basename "$f")"
   size="$(wc -c < "$f" | tr -d ' ')"
@@ -59,16 +60,19 @@ while IFS= read -r -d '' f; do
     fi
   done
 
-  # soft checks
   if ! grep -q '^keywords:' "$f"; then
     echo "WARN  $base  no keywords:"
     warnings=$((warnings + 1))
   fi
-done < <(find "$PAGES" -maxdepth 1 -type f -name '*.md' -print0 | sort -z)
+done
 
 echo
 echo "checked $count pages  errors=$errors  warnings=$warnings"
 
+if [[ "$count" -eq 0 ]]; then
+  echo "error: no markdown pages found in $PAGES" >&2
+  exit 1
+fi
 if [[ "$errors" -gt 0 ]]; then
   exit 1
 fi
