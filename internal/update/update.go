@@ -3,7 +3,6 @@ package update
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,9 +15,9 @@ import (
 )
 
 const (
-	repoOwner = "erfankasraie"
-	repoName  = "Faman"
-	apiBase   = "https://api.github.com/repos/" + repoOwner + "/" + repoName
+	repoOwner  = "erfankasraie"
+	repoName   = "Faman"
+	apiBase    = "https://api.github.com/repos/" + repoOwner + "/" + repoName
 	archiveURL = "https://github.com/" + repoOwner + "/" + repoName + "/archive/refs/heads/main.tar.gz"
 )
 
@@ -56,8 +55,7 @@ func Run(opt Options) error {
 	printKV(useColor, "نسخه محلی", cur)
 	printKV(useColor, "آخرین روی GitHub", rem+"  ("+src+")")
 
-	cmp := compareVersions(cur, rem)
-	switch cmp {
+	switch compareVersions(cur, rem) {
 	case 0:
 		printOK(useColor, "با آخرین انتشار هم‌تراز هستید (یا همان تگ pre).")
 	case -1:
@@ -92,7 +90,6 @@ func Run(opt Options) error {
 func latestRemoteVersion() (tag, source string, err error) {
 	client := &http.Client{Timeout: 12 * time.Second}
 
-	// 1) latest release (may 404 if only pre-releases / none)
 	req, _ := http.NewRequest(http.MethodGet, apiBase+"/releases/latest", nil)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("User-Agent", "faman-update")
@@ -109,7 +106,6 @@ func latestRemoteVersion() (tag, source string, err error) {
 		}
 	}
 
-	// 2) most recent tag
 	req2, _ := http.NewRequest(http.MethodGet, apiBase+"/tags?per_page=5", nil)
 	req2.Header.Set("Accept", "application/vnd.github+json")
 	req2.Header.Set("User-Agent", "faman-update")
@@ -152,21 +148,17 @@ func refreshPages(force bool, useColor bool) error {
 }
 
 func pagesInstallDir(force bool) (string, error) {
-	// Prefer explicit env
 	if env := os.Getenv("FAMAN_PAGES"); env != "" {
 		if writableDir(env) || force {
 			return env, nil
 		}
 	}
 
-	// If current pages dir is under home, reuse it
 	if cur, err := parser.PagesDir(); err == nil {
 		if underHome(cur) && (writableDir(cur) || force) {
 			return cur, nil
 		}
-		if !underHome(cur) && !force {
-			// system path — install to user share instead
-		}
+		// System install path: prefer user share unless --force and writable.
 		if force && writableDir(filepath.Dir(cur)) {
 			return cur, nil
 		}
@@ -230,14 +222,12 @@ func countMD(dir string) int {
 	return n
 }
 
-// compareVersions returns -1 if a<b, 0 if equal-ish, 1 if a>b (best-effort semver-ish).
 func compareVersions(a, b string) int {
 	a = strings.TrimPrefix(strings.ToLower(a), "v")
 	b = strings.TrimPrefix(strings.ToLower(b), "v")
 	if a == b {
 		return 0
 	}
-	// strip pre-release suffix for rough compare
 	abase := strings.Split(a, "-")[0]
 	bbase := strings.Split(b, "-")[0]
 	ap := strings.Split(abase, ".")
@@ -257,7 +247,6 @@ func compareVersions(a, b string) int {
 			return 1
 		}
 	}
-	// same base; prefer non-pre as newer
 	hasPreA := strings.Contains(a, "-")
 	hasPreB := strings.Contains(b, "-")
 	if hasPreA && !hasPreB {
@@ -337,6 +326,3 @@ func printOfflineHints(useColor bool) {
 	fmt.Println(dim(useColor, "  curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash"))
 	fmt.Println(dim(useColor, "  faman update --pages"))
 }
-
-// ensure we use io for download helper in pages.go
-var _ = io.EOF

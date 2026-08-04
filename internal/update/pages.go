@@ -41,7 +41,6 @@ func downloadPagesTo(dest string) error {
 	}
 	defer os.RemoveAll(tmp)
 
-	prefix := "" // e.g. Faman-main/pages/fa/
 	for {
 		hdr, err := tr.Next()
 		if err == io.EOF {
@@ -53,7 +52,6 @@ func downloadPagesTo(dest string) error {
 		name := filepath.ToSlash(hdr.Name)
 		idx := strings.Index(name, "/pages/fa/")
 		if idx < 0 {
-			// also allow exact pages/fa at start after repo root
 			continue
 		}
 		rel := name[idx+len("/pages/fa/"):]
@@ -69,7 +67,7 @@ func downloadPagesTo(dest string) error {
 			if err := os.MkdirAll(target, 0o755); err != nil {
 				return err
 			}
-		case tar.TypeReg, tar.TypeRegA:
+		case tar.TypeReg:
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return err
 			}
@@ -82,9 +80,6 @@ func downloadPagesTo(dest string) error {
 				return err
 			}
 			_ = f.Close()
-			if prefix == "" {
-				prefix = name[:idx+len("/pages/fa/")]
-			}
 		}
 	}
 
@@ -99,7 +94,6 @@ func downloadPagesTo(dest string) error {
 	if err := os.MkdirAll(dest, 0o755); err != nil {
 		return err
 	}
-	// Replace contents: remove old md files then copy
 	old, _ := os.ReadDir(dest)
 	for _, e := range old {
 		if !e.IsDir() && strings.HasSuffix(e.Name(), ".md") {
