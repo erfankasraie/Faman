@@ -16,6 +16,7 @@
 </p>
 
 > faman is **not** a translator — it **teaches** Linux commands in Persian.
+> faman یک مترجم نیست؛ بلکه دستورات لینوکس را به زبان فارسی آموزش می‌دهد.
 
 نسخه: **`0.1.4-pre`**
 
