@@ -11,8 +11,8 @@ import (
 func init() {
 	rootCmd.ValidArgsFunction = completePageNames
 	searchCmd.ValidArgsFunction = completeSearchQuery
-	listCmd.RegisterFlagCompletionFunc("cat", completeCategories)
-	searchCmd.RegisterFlagCompletionFunc("cat", completeCategories)
+	_ = listCmd.RegisterFlagCompletionFunc("cat", completeCategories)
+	_ = searchCmd.RegisterFlagCompletionFunc("cat", completeCategories)
 }
 
 func completePageNames(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -46,7 +46,6 @@ func completePageNames(cmd *cobra.Command, args []string, toComplete string) ([]
 }
 
 func completeSearchQuery(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	// First word: suggest page titles as starting points
 	if len(args) == 0 {
 		return completePageNames(cmd, args, toComplete)
 	}
