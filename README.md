@@ -27,20 +27,26 @@
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash
-# با فونت و RTL:
-curl -fsSL https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/get.sh | bash -s -- --rtl
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-### ویندوز (PowerShell)
+### ویندوز
 
 ```powershell
 irm https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.ps1 | iex
 ```
 
-باینری‌های آماده: [Releases](https://github.com/erfankasraie/Faman/releases)
+### راهنمای هر سیستم
 
-جزئیات: [docs/install.md](docs/install.md) · [docs/windows.md](docs/windows.md)
+| سیستم | سند |
+|--------|-----|
+| Ubuntu، Fedora، Arch، Alpine، WSL، … | [docs/linux-distros.md](docs/linux-distros.md) |
+| macOS (Intel و Apple Silicon) | [docs/macos.md](docs/macos.md) |
+| ویندوز | [docs/windows.md](docs/windows.md) |
+| ساخت `.deb` / `.exe` / آرشیو | [docs/packaging.md](docs/packaging.md) |
+
+باینری آماده: [Releases](https://github.com/erfankasraie/Faman/releases)  
+(`linux-amd64/arm64` · `darwin-amd64/arm64` · `windows-amd64.zip`)
 
 ---
 
@@ -49,8 +55,6 @@ irm https://raw.githubusercontent.com/erfankasraie/Faman/main/scripts/install.ps
 ```bash
 faman ls
 faman find
-faman search docker
-faman update --check
 faman update --pages
 faman version
 ```
@@ -59,53 +63,15 @@ faman version
 
 ---
 
-## به‌روزرسانی
-
-| هدف | دستور |
-|------|--------|
-| بررسی نسخه | `faman update` یا `faman update --check` |
-| تازه‌سازی صفحات | `faman update --pages` |
-| باینری جدید | دوباره `get.sh` / `install.ps1` یا دانلود از Releases |
-
-صفحات معمولاً در `~/.local/share/faman/pages/fa` (لینوکس) یا `%LOCALAPPDATA%\faman\pages\fa` (ویندوز) نصب می‌شوند.
-
----
-
 ## امکانات
 
-- **۱۳۵+** صفحه فارسی (از جمله manهای عمیق مثل find/grep/tar/rsync/curl)
-- مدیران بسته و محیط مجازی (apt…cargo، venv…poetry)
-- جستجو، completion، zsh/fzf/bat
-- لینوکس · ویندوز · macOS
+- ۱۳۵+ صفحه فارسی
+- `faman update --check` / `--pages`
+- لینوکس · macOS · ویندوز
 
-فهرست: [docs/pages-index.md](docs/pages-index.md)
+## مستندات بیشتر
 
----
-
-## مستندات
-
-| موضوع | لینک |
-|--------|------|
-| نصب | [docs/install.md](docs/install.md) |
-| ویندوز | [docs/windows.md](docs/windows.md) |
-| فارسی در ترمینال | [docs/terminal-persian.md](docs/terminal-persian.md) |
-| zsh / fzf | [docs/zsh.md](docs/zsh.md) · [docs/fzf.md](docs/fzf.md) |
-| رودمپ | [ROADMAP.md](ROADMAP.md) |
-| تغییرات | [CHANGELOG.md](CHANGELOG.md) |
-| انتشار | [.github/RELEASE_INSTRUCTIONS.md](.github/RELEASE_INSTRUCTIONS.md) |
-
----
-
-## ساخت از سورس
-
-```bash
-git clone https://github.com/erfankasraie/Faman.git && cd Faman
-go build -ldflags "-X github.com/faman-project/faman/internal/app.version=0.1.4-pre" -o faman ./cmd/faman
-export FAMAN_PAGES="$PWD/pages/fa"
-./faman version
-```
-
-نیاز: Go **1.22+**
+[install](docs/install.md) · [update](docs/update.md) · [ROADMAP](ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
 
 ## License
 

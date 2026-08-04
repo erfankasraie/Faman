@@ -1,45 +1,101 @@
-# بسته‌بندی و انتشار (`.exe` · `.deb` · آرشیو)
+# بسته‌بندی و انتشار
+
+راهنمای ساخت آرتیفکت برای **لینوکس (چند معماری/توزیع)**، **macOS** و **ویندوز**.
 
 ## خلاصه فرمت‌ها
 
-| فرمت | پلتفرم | چطور ساخته می‌شود |
-|------|--------|-------------------|
-| `faman.exe` داخل `.zip` | ویندوز x64 | `GOOS=windows GOARCH=amd64 go build` |
-| `.tar.gz` | لینوکس / macOS | همان build + `tar` + پوشه `pages` |
-| `.deb` | دبیان/اوبونتو amd64 | `scripts/package.sh` + `dpkg-deb` |
-| GitHub Release | همه | workflow `release.yml` روی تگ `v*` |
+| فرمت | پلتفرم | ابزار |
+|------|--------|--------|
+| `*-linux-amd64.tar.gz` | لینوکس x86_64 (Ubuntu, Fedora, Arch, …) | `package.sh` / Release |
+| `*-linux-arm64.tar.gz` | لینوکس ARM64 (Pi, ARM server) | همان |
+| `*-darwin-arm64.tar.gz` | macOS Apple Silicon | همان |
+| `*-darwin-amd64.tar.gz` | macOS Intel | همان |
+| `*-windows-amd64.zip` | ویندوز (`faman.exe`) | همان |
+| `*_amd64.deb` | Debian/Ubuntu | `package.sh` + `dpkg-deb` |
+| `.rpm` | Fedora/RHEL/openSUSE | هنوز نه (رودمپ: nFPM) |
+| AUR / Homebrew | Arch / macOS | رودمپ |
+
+یک باینری لینوکس برای **همهٔ distroهای glibc رایج** کافی است؛ نیازی به بستهٔ جدا per-distro نیست مگر بخواهید در مخزن رسمی آن‌ها باشید.
 
 ---
 
-## یک‌خطی محلی
+## یک‌خطی build
 
 ```bash
-# همه آرشیوها + .deb (اگر dpkg-deb باشد)
 ./scripts/package.sh
-
 VERSION=0.1.4-pre ./scripts/package.sh
-./scripts/package.sh --no-deb      # فقط tar/zip
-./scripts/package.sh --deb-only    # فقط deb
+./scripts/package.sh --no-deb
+./scripts/package.sh --deb-only
 ```
 
 خروجی در `dist/`:
 
-- `faman-VERSION-linux-amd64.tar.gz`
-- `faman-VERSION-linux-arm64.tar.gz`
-- `faman-VERSION-windows-amd64.zip`  ← شامل **`faman.exe`** و `pages/`
-- `faman-VERSION-darwin-*.tar.gz`
-- `faman_VERSION_amd64.deb`
-- `SHA256SUMS`
-
-### نصب deb
-
-```bash
-sudo dpkg -i dist/faman_*_amd64.deb
-faman version
-# صفحات: /usr/local/share/faman/pages/fa
+```text
+faman-VERSION-linux-amd64.tar.gz
+faman-VERSION-linux-arm64.tar.gz
+faman-VERSION-darwin-amd64.tar.gz
+faman-VERSION-darwin-arm64.tar.gz
+faman-VERSION-windows-amd64.zip    # faman.exe + pages/
+faman_VERSION_amd64.deb            # اگر dpkg-deb باشد
+SHA256SUMS
 ```
 
-### ویندوز
+هر آرشیو شامل **باینری + `pages/fa`** است.
+
+---
+
+## لینوکس — استفاده از آرتیفکت
+
+```bash
+tar -xzf faman-*-linux-amd64.tar.gz
+cd faman-*-linux-amd64
+export FAMAN_PAGES="$PWD/pages/fa"
+./faman version
+```
+
+### deb (Debian/Ubuntu)
+
+```bash
+sudo apt install dpkg-dev
+./scripts/package.sh --deb-only
+sudo dpkg -i dist/faman_*_amd64.deb
+```
+
+### بقیهٔ توزیع‌ها
+
+جدول نصب کاربر: [linux-distros.md](linux-distros.md)
+
+---
+
+## macOS — استفاده از آرتیفکت
+
+```bash
+# Apple Silicon
+tar -xzf faman-*-darwin-arm64.tar.gz
+cd faman-*-darwin-arm64
+export FAMAN_PAGES="$PWD/pages/fa"
+./faman ls
+
+# Intel
+tar -xzf faman-*-darwin-amd64.tar.gz
+```
+
+راهنمای کامل مک: [macos.md](macos.md)
+
+Cross-compile از لینوکس:
+
+```bash
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o faman-darwin-arm64 ./cmd/faman
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o faman-darwin-amd64 ./cmd/faman
+```
+
+> امضای Apple (notarize) برای توزیع بیرون Gatekeeper فعلاً انجام نمی‌شود؛ برای استفادهٔ شخصی/توسعه‌دهنده معمولاً کافی است: System Settings → Privacy → Allow.
+
+---
+
+## ویندوز — `.exe`
+
+داخل zip:
 
 ```powershell
 Expand-Archive faman-*-windows-amd64.zip
@@ -48,43 +104,41 @@ $env:FAMAN_PAGES = "$PWD\pages\fa"
 .\faman.exe ls
 ```
 
----
-
-## فقط `.exe` (بدون اسکریپت)
+یا فقط باینری:
 
 ```bash
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build \
-  -ldflags "-s -w -X github.com/faman-project/faman/internal/app.version=0.1.4-pre" \
-  -o faman.exe ./cmd/faman
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o faman.exe ./cmd/faman
 ```
 
-صفحات را جداگانه کنار exe بگذارید یا `FAMAN_PAGES` را ست کنید.
+[windows.md](windows.md)
 
 ---
 
-## انتشار روی GitHub
+## انتشار GitHub Release
 
-1. Actions → **Release** → Run workflow با تگ مثلاً `v0.1.4-pre`
-2. یا: `git tag -a v0.1.4-pre -m "..." && git push origin v0.1.4-pre`
+```text
+Actions → Release → Run workflow → tag v0.1.4-pre
+```
 
-workflow فعلی می‌سازد: **tar.gz + zip ویندوز** (هنوز deb را آپلود نمی‌کند).  
-برای افزودن deb به Release، یا خروجی `package.sh` را دستی به Release ضمیمه کنید، یا workflow را گسترش دهید.
+یا تگ git. workflow می‌سازد: tar.gz لینوکس/داروین + zip ویندوز.  
+`.deb` را با `package.sh` بسازید و در صورت نیاز دستی به Release ضمیمه کنید.
 
 ---
 
-## بعداً (رودمپ)
+## نقشهٔ آینده
 
-| بسته | ابزار پیشنهادی |
+| هدف | روش پیشنهادی |
 |------|----------------|
-| deb/rpm بهتر | [goreleaser](https://goreleaser.com) + nFPM |
-| AUR | `PKGBUILD` جدا |
-| Homebrew | formula جدا |
-| MSI ویندوز | اختیاری؛ zip+exe کافی است |
+| deb/rpm یکدست | goreleaser + nFPM |
+| AUR | `PKGBUILD` + `faman-bin` |
+| Homebrew | tap جدا یا formula |
+| Alpine | apk از سورس / build روی musl |
+| امضای مک | Apple Developer + notarize |
 
 ---
 
-## پیش‌نیاز .deb روی ماشین build
+## پیش‌نیاز build deb
 
 ```bash
-sudo apt install dpkg-dev   # dpkg-deb
+sudo apt install dpkg-dev
 ```
