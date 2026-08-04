@@ -1,29 +1,30 @@
-# Cutting a pre-release
+# Cutting a release
 
-## Automated (recommended)
+## v0.1.4-pre (current)
 
-1. Open **Actions → Release → Run workflow**
-2. Tag: `v0.1.2-pre`
-3. prerelease: **true**
-4. Run — builds Linux / Windows / macOS archives with `pages/fa` and publishes a GitHub Pre-release.
+### Option A — Actions (recommended)
 
-Or from git:
+1. Open [Actions → Release](https://github.com/erfankasraie/Faman/actions/workflows/release.yml)
+2. **Run workflow**
+3. Tag: `v0.1.4-pre`
+4. prerelease: **true**
+5. Run
+
+This builds Linux / Windows / macOS archives (binary + `pages/fa`) and publishes a GitHub Pre-release.
+
+### Option B — Git tag
 
 ```bash
 git checkout main && git pull
-git tag -a v0.1.2-pre -m "v0.1.2-pre"
-git push origin v0.1.2-pre
+git tag -a v0.1.4-pre -m "faman v0.1.4-pre"
+git push origin v0.1.4-pre
 ```
 
-Pushing the tag triggers the same workflow.
+### After publish
 
-## Assets produced
+- Verify: https://github.com/erfankasraie/Faman/releases
+- Smoke: download linux amd64 tarball → `./faman version` → `./faman update --check`
 
-- `faman-*-linux-amd64.tar.gz`
-- `faman-*-linux-arm64.tar.gz`
-- `faman-*-windows-amd64.zip`
-- `faman-*-darwin-amd64.tar.gz`
-- `faman-*-darwin-arm64.tar.gz`
-- `SHA256SUMS`
+### Version in code
 
-Do **not** use a long-lived branch named like a version tag; tags only.
+`internal/app/root.go` → `version = "0.1.4-pre"` (override with `-ldflags` in CI).
