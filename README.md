@@ -18,7 +18,6 @@
 
 > faman is **not** a translator — it **teaches** Linux commands in Persian.
 
-نسخهٔ کد روی main: **`0.2.2`** (ریلیز تگ `v0.2.2` — فردا)
 
 ---
 
