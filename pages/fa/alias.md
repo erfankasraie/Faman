@@ -6,44 +6,63 @@ difficulty: beginner
 keywords:
 - shortcut
 - shell
-- config
+- customization
+- bashrc
 ---
 
 # Introduction
 
-`alias` میانبر برای دستورات طولانی در شل می‌سازد. builtin است.
+`alias` یک میان‌بر (نام مستعار) برای یک دستور طولانی یا پرتکرار می‌سازد؛ مثلاً به‌جای تایپ یک دستور طولانی هر بار، یک نام کوتاه تعریف می‌کنید.
 
 # Syntax
 
 ```
-alias
-alias name='command'
-unalias name
+alias NAME='COMMAND'
+alias                    # نمایش تمام aliasهای فعلی
+unalias NAME             # حذف یک alias
 ```
 
 # Options
 
-بدون گزینه لیست aliasها را نشان می‌دهد.
+`alias` گزینه خط‌فرمانی خاصی ندارد؛ سینتکس آن خودِ تعریف `NAME=COMMAND` است. برای حذف از `unalias NAME` یا `unalias -a` (حذف همه) استفاده کنید.
 
 # Examples
 
 ```bash
-alias ll='ls -lah'
-alias gs='git status'
-alias grep='grep --color=auto'
+# ساخت یک alias ساده
+alias ll='ls -la'
+
+# alias با چند دستور ترکیبی
+alias update='sudo apt update && sudo apt upgrade -y'
+
+# alias برای جلوگیری از اشتباهات رایج (تأیید قبل از حذف)
+alias rm='rm -i'
+
+# نمایش تمام aliasهای فعال
+alias
+
+# حذف یک alias
 unalias ll
+
+# ذخیره دائمی: افزودن به فایل تنظیمات پوسته
+echo "alias ll='ls -la'" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 # Common mistakes
 
-- انتظار ماندگاری بدون نوشتن در `~/.bashrc` یا `~/.zshrc`.
+- تعریف alias مستقیم در ترمینال بدون افزودن به `~/.bashrc` (یا `~/.zshrc`)؛ در این حالت با بستن ترمینال، alias از بین می‌رود.
+- فراموش‌کردن `source ~/.bashrc` بعد از ویرایش فایل تنظیمات؛ بدون آن، alias جدید تا باز‌کردن ترمینال جدید اعمال نمی‌شود.
+- ساخت alias با نامی که یک دستور واقعی سیستم را بازنویسی می‌کند (مثل `alias ls='ls --color'`) بدون آگاهی، که می‌تواند رفتار غیرمنتظره در اسکریپت‌ها ایجاد کند (البته aliasها معمولاً در اسکریپت‌های غیرتعاملی فعال نیستند).
 
 # Tips
 
-- در اسکریپت‌ها alias معمولاً غیرفعال است؛ از تابع استفاده کنید.
+- برای دیدن این‌که یک دستور alias است یا فایل واقعی: `type COMMAND`
+- الگوی متداول: aliasهای شخصی را در یک فایل جدا (مثل `~/.bash_aliases`) نگه دارید و در `~/.bashrc` آن را source کنید تا مدیریت راحت‌تر باشد.
+- alias فقط در پوسته‌های تعاملی کار می‌کند، نه در اسکریپت‌های اجراشده با `bash script.sh` (مگر تنظیم خاص انجام شود).
 
 # Related commands
 
-- `type`
-- `which`
-- `function` در bash
+- `type` — بررسی این‌که یک نام، alias/function/فایل است
+- `unalias` — حذف یک alias
+- `function` — تعریف یک تابع کامل‌تر از alias (با پشتیبانی آرگومان)

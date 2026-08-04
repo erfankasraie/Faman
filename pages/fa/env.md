@@ -1,49 +1,67 @@
 ---
 title: env
 aliases:
-category: shell
-difficulty: beginner
+category: environment
+difficulty: intermediate
 keywords:
 - environment
 - variables
-- path
+- shell
+- script
 ---
 
 # Introduction
 
-`env` متغیرهای محیطی را نمایش می‌دهد یا یک دستور را با محیط تغییر‌یافته اجرا می‌کند.
+`env` متغیرهای محیطی (environment variables) فعلی را نمایش می‌دهد یا یک برنامه را با محیط تغییریافته (متغیرهای اضافه/حذف‌شده) اجرا می‌کند. یکی از پرکاربردترین موارد استفاده‌اش خط شبانگ (`#!/usr/bin/env python3`) در ابتدای اسکریپت‌هاست که مسیر مفسر را به‌صورت portable پیدا می‌کند.
 
 # Syntax
 
 ```
-env [OPTIONS] [NAME=VALUE]... [COMMAND]
+env [OPTIONS] [NAME=VALUE...] [COMMAND [ARGS...]]
 ```
 
 # Options
 
 | گزینه | توضیح |
 |-------|--------|
-| `-i` | محیط خالی |
-| `-u NAME` | حذف یک متغیر |
+| `-i` | اجرا با محیط کاملاً خالی (بدون ارث‌بردن متغیرهای فعلی) |
+| `-u NAME` | حذف یک متغیر خاص قبل از اجرا |
+| `-0` | جداکردن خروجی با کاراکتر null به‌جای newline (برای اسکریپت امن) |
 
 # Examples
 
 ```bash
+# نمایش تمام متغیرهای محیطی فعلی
 env
-env | grep PATH
-env LANG=C ls
-env -i HOME=$HOME bash --noprofile --norc
+
+# اجرای یک برنامه با یک متغیر اضافه‌شده موقت
+env MY_VAR=hello ./script.sh
+
+# اجرای برنامه با محیط کاملاً خالی (فقط PATH لازم است دستی داده شود)
+env -i PATH=/usr/bin ./script.sh
+
+# اجرای برنامه بدون یک متغیر خاص
+env -u HTTP_PROXY curl https://example.com
+
+# استفاده در خط شبانگ اسکریپت پایتون (portable بین سیستم‌ها)
+#!/usr/bin/env python3
+
+# فیلترکردن متغیرهای مرتبط با یک موضوع خاص
+env | grep -i proxy
 ```
 
 # Common mistakes
 
-- اشتباه گرفتن `export` (پایدار در شل فعلی) با `env` برای یک اجرا.
+- گیج‌شدن بین `env VAR=value command` (که فقط برای همان یک اجرا موقت است) و `export VAR=value` (که برای کل نشست فعلی پوسته باقی می‌ماند).
+- استفاده از مسیر مستقیم مفسر (مثل `#!/usr/bin/python3`) به‌جای `#!/usr/bin/env python3`؛ روش دوم portable‌تر است چون به مسیر نصب دقیق مفسر وابسته نیست.
 
 # Tips
 
-- شِبانگ قابل حمل: `#!/usr/bin/env python3`
+- `#!/usr/bin/env python3` (یا `node`, `bash`, ...) استاندارد صنعتی برای خط شبانگ اسکریپت‌هاست، چون از `PATH` کاربر استفاده می‌کند و روی سیستم‌های مختلف (که مسیر نصب متفاوت دارند) کار می‌کند.
+- برای دیباگ مشکلات مربوط به متغیرهای محیطی (مثلاً چرا یک برنامه رفتار متفاوتی دارد)، `env` را قبل و بعد از تنظیم متغیر مقایسه کنید.
 
 # Related commands
 
-- `export` — تنظیم در شل
-- `printenv` — چاپ یک متغیر
+- `export` — تنظیم دائمی یک متغیر برای نشست جاری پوسته
+- `printenv` — نمایش ساده‌تر یک یا چند متغیر خاص
+- `set` — نمایش تمام متغیرهای شل (شامل غیر export شده)
