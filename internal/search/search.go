@@ -15,12 +15,24 @@ type Result struct {
 	Score    float64
 }
 
+// Options filters search results.
+type Options struct {
+	Category string // exact category match (case-insensitive); empty = all
+}
+
 // Search finds pages matching the query.
 func Search(query string) ([]Result, error) {
+	return SearchOpts(query, Options{})
+}
+
+// SearchOpts finds pages matching the query with optional filters.
+func SearchOpts(query string, opt Options) ([]Result, error) {
 	pages, err := parser.ListPages()
 	if err != nil {
 		return nil, err
 	}
+
+	catFilter := strings.ToLower(strings.TrimSpace(opt.Category))
 
 	q := normalize(query)
 	terms := strings.Fields(q)
@@ -30,6 +42,9 @@ func Search(query string) ([]Result, error) {
 
 	var results []Result
 	for _, p := range pages {
+		if catFilter != "" && strings.ToLower(p.Category) != catFilter {
+			continue
+		}
 		score, snippet := scorePage(p, terms)
 		if score > 0 {
 			results = append(results, Result{
@@ -41,7 +56,6 @@ func Search(query string) ([]Result, error) {
 		}
 	}
 
-	// Simple sort by score descending
 	for i := 0; i < len(results); i++ {
 		for j := i + 1; j < len(results); j++ {
 			if results[j].Score > results[i].Score {
@@ -87,7 +101,6 @@ func scorePage(p *parser.Page, terms []string) (float64, string) {
 		}
 	}
 
-	// Content search
 	contentNorm := normalize(p.Content)
 	for _, t := range terms {
 		if strings.Contains(contentNorm, t) {
