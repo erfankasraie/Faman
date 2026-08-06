@@ -4,47 +4,63 @@ aliases:
 category: filesystem
 difficulty: intermediate
 keywords:
-- unmount
+- mount
 - disk
-- detach
+- filesystem
+- unmount
 ---
 
 # Introduction
 
-`umount` فایل‌سیستم mount شده را جدا می‌کند. توجه: املای دستور `umount` است نه unmount.
+`umount` یک فایل‌سیستم سوارشده (mounted) را از سیستم جدا می‌کند؛ پیش از خارج‌کردن فیزیکی یک دیسک یا فلش، باید ابتدا با `umount` آن را جدا کرد تا از خرابی داده جلوگیری شود.
 
 # Syntax
 
 ```
-umount [OPTIONS] DIR|DEVICE
+umount [OPTIONS] DEVICE_OR_MOUNTPOINT
 ```
 
 # Options
 
 | گزینه | توضیح |
 |-------|--------|
-| `-l` | lazy unmount |
-| `-f` | اجباری (با احتیاط) |
-| `-a` | همه |
+| `-f` | جدا‌کردن اجباری (برای فایل‌سیستم‌های شبکه‌ای که پاسخ نمی‌دهند) |
+| `-l` | جدا‌کردن «تنبل» (lazy) — فوراً از namespace خارج می‌شود، حتی اگر هنوز مشغول باشد |
+| `-a` | جدا‌کردن تمام فایل‌سیستم‌های ذکرشده در `/etc/mtab` |
 
 # Examples
 
 ```bash
-sudo umount /mnt/data
+# جدا‌کردن با نام دستگاه
 sudo umount /dev/sdb1
-sudo umount -l /mnt/stuck
+
+# جدا‌کردن با نقطه mount
+sudo umount /mnt/usb
+
+# جدا‌کردن اجباری یک share شبکه‌ای که پاسخ نمی‌دهد
+sudo umount -f /mnt/network-share
+
+# جدا‌کردن تنبل وقتی فایل‌سیستم "busy" است ولی می‌خواهید فوراً از دسترس خارج شود
+sudo umount -l /mnt/usb
+
+# بررسی این‌که چه پردازشی فایل‌سیستم را مشغول نگه داشته (قبل از جدا‌کردن)
+sudo lsof /mnt/usb
+sudo fuser -m /mnt/usb
 ```
 
 # Common mistakes
 
-- «target is busy» وقتی فایل یا شل هنوز داخل mount باز است.
+- خارج‌کردن فیزیکی یک فلش/دیسک **بدون** اجرای `umount` قبلی؛ این کار می‌تواند باعث از‌دست‌رفتن داده‌های هنوز در بافر نوشته‌نشده روی دیسک شود.
+- مواجه‌شدن با خطای «target is busy» و رفتن مستقیم سراغ `umount -f` بدون بررسی این‌که کدام برنامه فایل‌سیستم را مشغول نگه داشته (با `lsof` یا `fuser`)؛ بستن آن برنامه معمولاً راه‌حل امن‌تری است.
 
 # Tips
 
-- پیدا کردن فرایند استفاده‌کننده: `lsof +f -- /mnt/data` یا `fuser -m /mnt/data`
+- قبل از `umount`، همیشه `sync` را اجرا کنید تا مطمئن شوید تمام داده‌های بافرشده روی دیسک نوشته شده‌اند.
+- برای پیداکردن اینکه چرا یک فایل‌سیستم «busy» است، `lsof +D /mnt/point` یا `fuser -vm /mnt/point` نشان می‌دهد کدام پردازش هنوز از آن استفاده می‌کند.
 
 # Related commands
 
-- `mount`
-- `lsof` / `fuser`
-- `findmnt`
+- `mount` — سوارکردن یک فایل‌سیستم
+- `lsblk` — لیست دیسک‌ها و پارتیشن‌ها
+- `sync` — نوشتن اجباری بافرها روی دیسک قبل از جدا‌کردن
+- `lsof` / `fuser` — پیداکردن پردازش‌های مشغول‌کننده یک فایل‌سیستم
